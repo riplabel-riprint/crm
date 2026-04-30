@@ -1,0 +1,18 @@
+export type TodoPriority = "normal" | "high";
+
+export type ChecklistItem = {
+  id: string;
+  text: string;
+  done: boolean;
+};
+
+export type TodoTask = {
+  id: string;
+  title: string;
+  priority: TodoPriority;
+  dueDate: string; // YYYY-MM-DD
+  done: boolean;
+  doneAt?: string; // YYYY-MM-DD
+  createdAt: string;
+  checklist: ChecklistItem[];
+};

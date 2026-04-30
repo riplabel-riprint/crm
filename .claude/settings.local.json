@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(mkdir -p C:/Users/przee/Desktop/riprint-app/src/app/\\\\\\(app\\\\\\)/orders/\\\\[id\\\\])",
+      "Bash(mkdir -p C:/Users/przee/Desktop/riprint-app/src/app/\\\\\\(app\\\\\\)/clients/\\\\[id\\\\])",
+      "Bash(npx next *)",
+      "Bash(npm run *)",
+      "Bash(npm show *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(taskkill /PID 15472 /F)",
+      "Bash(cmd /c \"taskkill /PID 15472 /F\")",
+      "Bash(cmd /c \"netstat -ano | findstr :3000\")",
+      "mcp__Claude_in_Chrome__tabs_context_mcp"
+    ]
+  }
+}
+{
+  "model": "sonnet",
+  "env": {
+    "MAX_THINKING_TOKENS": "5000",
+    "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1"
+  }
+}
