@@ -533,13 +533,13 @@ export function DashboardScreen({ recentOrders, clients, orders }: Props) {
   const loaded = useRef(false);
   const { width, containerRef } = useContainerWidth({ measureBeforeMount: false, initialWidth: 1280 });
 
-  function handleLayoutsChange(_: unknown, allLayouts: Layouts) {
+  function handleLayoutsChange(_: unknown, allLayouts: unknown) {
     if (!loaded.current) {
       loaded.current = true;
       return;
     }
-    setLayouts(allLayouts);
-    saveLayouts(allLayouts);
+    setLayouts(allLayouts as Layouts);
+    saveLayouts(allLayouts as Layouts);
   }
 
   function reset() {
