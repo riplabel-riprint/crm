@@ -533,7 +533,8 @@ export function DashboardScreen({ recentOrders, clients, orders }: Props) {
   const loaded = useRef(false);
   const { width, containerRef } = useContainerWidth({ measureBeforeMount: false, initialWidth: 1280 });
 
-  function handleLayoutsChange(_: unknown, allLayouts: unknown) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function handleLayoutsChange(_: any, allLayouts: any) {
     if (!loaded.current) {
       loaded.current = true;
       return;
@@ -643,7 +644,7 @@ export function DashboardScreen({ recentOrders, clients, orders }: Props) {
                 rowHeight={ROW_H}
                 margin={MARGIN}
                 containerPadding={[0, 0]}
-                onLayoutChange={handleLayoutsChange}
+                onLayoutChange={(_: unknown, allLayouts: unknown) => handleLayoutsChange(_, allLayouts)}
                 onResizeStart={() => setResizing(true)}
                 onResizeStop={() => setResizing(false)}
                 isDraggable={editMode}
