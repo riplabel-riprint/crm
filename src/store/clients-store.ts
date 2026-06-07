@@ -3,7 +3,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Client, ClientStatus, ClientType } from "@/types/crm";
-import { SEED_CLIENTS } from "@/lib/data/clients-seed";
 
 export type ClientInput = Omit<Client, "id">;
 
@@ -18,7 +17,7 @@ type ClientsState = {
 export const useClientsStore = create<ClientsState>()(
   persist(
     (set, get) => ({
-      clients: SEED_CLIENTS,
+      clients: [],
 
       addClient: (input) => {
         const client: Client = {

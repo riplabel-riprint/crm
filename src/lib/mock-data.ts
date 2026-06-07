@@ -50,6 +50,7 @@ export const mockServices: Service[] = [
     unit: "m²",
     description: "Druk solwentowy na banerze PVC 510g. Rozdzielczość 720 dpi.",
     isActive: true,
+    productIds: [],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2025-11-01T00:00:00Z",
   },
@@ -61,6 +62,7 @@ export const mockServices: Service[] = [
     basePrice: { amount: 1200, currency: "PLN" }, // 12 PLN/m²
     unit: "m²",
     isActive: true,
+    productIds: [],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2025-11-01T00:00:00Z",
   },
@@ -72,6 +74,7 @@ export const mockServices: Service[] = [
     basePrice: { amount: 150, currency: "PLN" }, // 1,50 PLN/szt.
     unit: "szt.",
     isActive: true,
+    productIds: [],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2025-11-01T00:00:00Z",
   },
@@ -80,12 +83,12 @@ export const mockServices: Service[] = [
 // ─── Products ────────────────────────────────────────────────────────────────
 
 export const mockProducts: Product[] = [
-  { id: "prod-001-banner", serviceId: "service-001", name: "Baner zewnętrzny",  description: "Trwały baner do ekspozycji na zewnątrz",              isActive: true },
-  { id: "prod-001-rollup", serviceId: "service-001", name: "Roll-up",           description: "Baner na systemie roll-up (baza w cenie)",             isActive: true },
-  { id: "prod-001-mesh",   serviceId: "service-001", name: "Siatka mesh",       description: "Baner siatkowy — przepuszcza wiatr, do rusztowań",     isActive: true },
-  { id: "prod-002-lam",    serviceId: "service-002", name: "Laminat arkuszowy", description: "Laminacja na gotowym wydruku arkuszowym",              isActive: true },
-  { id: "prod-002-roll",   serviceId: "service-002", name: "Laminat rolowy",    description: "Laminacja rolowa do dużych formatów",                  isActive: true },
-  { id: "prod-003-eyelets",serviceId: "service-003", name: "Oczka standardowe", description: "Oczka aluminiowe ø10 mm",                             isActive: true },
+  { id: "prod-001-banner", serviceId: "service-001", name: "Baner zewnętrzny",  description: "Trwały baner do ekspozycji na zewnątrz",              price: { amount: 3500, currency: "PLN" }, isActive: true },
+  { id: "prod-001-rollup", serviceId: "service-001", name: "Roll-up",           description: "Baner na systemie roll-up (baza w cenie)",             price: { amount: 18000, currency: "PLN" }, isActive: true },
+  { id: "prod-001-mesh",   serviceId: "service-001", name: "Siatka mesh",       description: "Baner siatkowy — przepuszcza wiatr, do rusztowań",     price: { amount: 2800, currency: "PLN" }, isActive: true },
+  { id: "prod-002-lam",    serviceId: "service-002", name: "Laminat arkuszowy", description: "Laminacja na gotowym wydruku arkuszowym",              price: { amount: 1200, currency: "PLN" }, isActive: true },
+  { id: "prod-002-roll",   serviceId: "service-002", name: "Laminat rolowy",    description: "Laminacja rolowa do dużych formatów",                  price: { amount: 900, currency: "PLN" }, isActive: true },
+  { id: "prod-003-eyelets",serviceId: "service-003", name: "Oczka standardowe", description: "Oczka aluminiowe ø10 mm",                             price: { amount: 50, currency: "PLN" }, isActive: true },
 ];
 
 // ─── Service Variants ─────────────────────────────────────────────────────────

@@ -46,9 +46,9 @@ const emptySpec: OrderJobSpec = {
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex gap-3 py-2.5 border-b border-gray-100 last:border-0">
-      <span className="w-36 shrink-0 text-xs text-gray-400 pt-px">{label}</span>
-      <span className="text-sm text-gray-800">{value}</span>
+    <div className="flex gap-3 py-2.5 border-b border-white/[0.05] last:border-0">
+      <span className="w-36 shrink-0 text-xs text-white/30 pt-px">{label}</span>
+      <span className="text-sm font-semibold text-white">{value}</span>
     </div>
   );
 }
@@ -76,7 +76,7 @@ export function OrderJobSpecCard({ orderId, spec }: Props) {
         {!editMode && (
           <button
             onClick={() => setEditMode(true)}
-            className="text-xs text-blue-600 hover:text-blue-800 transition-colors"
+            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
           >
             Edytuj
           </button>
@@ -93,7 +93,7 @@ export function OrderJobSpecCard({ orderId, spec }: Props) {
         <CardBody className="py-1 px-5">
           <Row label="Format" value={formatValue} />
           <Row label="Nakład" value={`${spec.quantity} ${spec.unit}`} />
-          <Row label="Materiał / papier" value={spec.material || <span className="text-gray-400">—</span>} />
+          <Row label="Materiał / papier" value={spec.material || <span className="text-white/25">—</span>} />
           <Row label="Rodzaj druku" value={printTypeLabels[spec.printType]} />
           <Row
             label="Wykończenie"
@@ -102,13 +102,13 @@ export function OrderJobSpecCard({ orderId, spec }: Props) {
                 <ul className="space-y-0.5">
                   {spec.finishing.map((f) => (
                     <li key={f} className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-gray-400 shrink-0" />
+                      <span className="h-1 w-1 rounded-full bg-white/25 shrink-0" />
                       {f}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <span className="text-gray-400">Brak</span>
+                <span className="text-white/25">Brak</span>
               )
             }
           />
@@ -118,10 +118,10 @@ export function OrderJobSpecCard({ orderId, spec }: Props) {
               <span>
                 {deliveryLabels[spec.deliveryMethod]}
                 {spec.deliveryAddress && (
-                  <span className="block text-xs text-gray-400 mt-0.5">{spec.deliveryAddress}</span>
+                  <span className="block text-xs text-white/30 mt-0.5">{spec.deliveryAddress}</span>
                 )}
                 {spec.deliveryNote && (
-                  <span className="block text-xs text-gray-400 mt-0.5">{spec.deliveryNote}</span>
+                  <span className="block text-xs text-white/30 mt-0.5">{spec.deliveryNote}</span>
                 )}
               </span>
             }
@@ -129,7 +129,7 @@ export function OrderJobSpecCard({ orderId, spec }: Props) {
           {spec.customNotes && (
             <Row
               label="Własne ustalenia"
-              value={<span className="whitespace-pre-line text-gray-700">{spec.customNotes}</span>}
+              value={<span className="whitespace-pre-line text-white/70">{spec.customNotes}</span>}
             />
           )}
         </CardBody>
@@ -168,8 +168,8 @@ function EditForm({
   }
 
   const inputCls =
-    "w-full rounded border border-gray-200 px-2.5 py-1.5 text-sm text-gray-800 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-200";
-  const labelCls = "block text-xs text-gray-400 mb-1";
+    "w-full rounded border border-white/[0.1] bg-white/[0.05] px-2.5 py-1.5 text-sm text-white/80 placeholder:text-white/25 focus:border-blue-400/60 focus:outline-none focus:ring-1 focus:ring-blue-400/20";
+  const labelCls = "block text-xs text-white/35 mb-1";
 
   return (
     <CardBody className="space-y-4">
@@ -271,7 +271,7 @@ function EditForm({
               />
               <button
                 onClick={() => removeFinishing(i)}
-                className="shrink-0 text-gray-400 hover:text-red-500 px-1 text-lg leading-none"
+                className="shrink-0 text-white/30 hover:text-red-400 px-1 text-lg leading-none"
                 aria-label="Usuń"
               >
                 ×
@@ -280,7 +280,7 @@ function EditForm({
           ))}
           <button
             onClick={addFinishing}
-            className="text-xs text-blue-600 hover:text-blue-800"
+            className="text-xs text-blue-400 hover:text-blue-300"
           >
             + Dodaj wykończenie
           </button>
@@ -340,7 +340,7 @@ function EditForm({
         {onClose && (
           <button
             onClick={onClose}
-            className="rounded px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 hover:border-gray-300 transition-colors"
+            className="rounded px-3 py-1.5 text-sm text-white/40 hover:text-white/70 border border-white/[0.1] hover:border-white/20 transition-colors"
           >
             Anuluj
           </button>

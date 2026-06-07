@@ -3,23 +3,33 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useReminders } from "@/hooks/useReminders";
 import { NotificationDropdown } from "./NotificationDropdown";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const { notifications, unreadCount, init, markAsRead, markAllAsRead } =
+  const { notifications, unreadCount, init, markAsRead, markAllAsRead, removeNotification } =
     useNotifications();
 
-  // Generate notifications on mount
+  const reminders = useReminders(notifications);
+
   useEffect(() => {
     init();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Close on outside click
   useEffect(() => {
-    if (!open) return;
+    const mq = window.matchMedia("(max-width: 640px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    if (!open || isMobile) return;
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
@@ -27,7 +37,7 @@ export function NotificationBell() {
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+  }, [open, isMobile]);
 
   return (
     <div ref={ref} className="relative">
@@ -44,14 +54,32 @@ export function NotificationBell() {
         )}
       </button>
 
-      {open && (
+      {open && isMobile && (
+        <div
+          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 px-4"
+          onClick={() => setOpen(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[420px]">
+            <NotificationDropdown
+              notifications={notifications}
+              unreadCount={unreadCount}
+              onMarkRead={(id) => markAsRead(id)}
+              onMarkAllRead={markAllAsRead}
+              onDelete={(id) => removeNotification(id)}
+              reminders={reminders}
+            />
+          </div>
+        </div>
+      )}
+
+      {open && !isMobile && (
         <NotificationDropdown
           notifications={notifications}
           unreadCount={unreadCount}
           onMarkRead={(id) => markAsRead(id)}
-          onMarkAllRead={() => {
-            markAllAsRead();
-          }}
+          onMarkAllRead={markAllAsRead}
+          onDelete={(id) => removeNotification(id)}
+          reminders={reminders}
         />
       )}
     </div>

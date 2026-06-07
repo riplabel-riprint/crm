@@ -1,9 +1,12 @@
-import { getOrders } from "@/lib/data/crm";
+import { Suspense } from "react";
 import { ClientsScreen } from "@/components/clients/ClientsScreen";
 
 export const metadata = { title: "Klienci | Riprint" };
 
-export default async function ClientsPage() {
-  const orders = await getOrders();
-  return <ClientsScreen orders={orders} />;
+export default function ClientsPage() {
+  return (
+    <Suspense>
+      <ClientsScreen />
+    </Suspense>
+  );
 }

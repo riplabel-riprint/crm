@@ -1,20 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { formatPLN, grossAmount, formatDatePL, isOverdue, ordersByClient } from "@/lib/data/crm";
-import type { Client, ClientStatus, ClientType, Order } from "@/types/crm";
+import { formatPLN, formatDatePL } from "@/lib/data/crm";
+import type { Client, ClientStatus, ClientType } from "@/types/crm";
 import { useClientsStore, type ClientInput } from "@/store/clients-store";
+import { useOrdersStore } from "@/store/orders-store";
+import type { OrderDetail } from "@/lib/data/orders";
 
-type Props = {
-  orders: Order[];
-};
-
-export function ClientsScreen({ orders }: Props) {
+export function ClientsScreen() {
   const { clients, addClient, updateClient, deleteClient } = useClientsStore();
+  const storeOrders = useOrdersStore((s) => s.orders);
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClientStatus | "Wszyscy">("Wszyscy");
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(() => searchParams.get("client"));
+
+  useEffect(() => {
+    const id = searchParams.get("client");
+    if (id) setActiveId(id);
+  }, [searchParams]);
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
@@ -33,7 +39,7 @@ export function ClientsScreen({ orders }: Props) {
   }, [clients, search, statusFilter]);
 
   const active = clients.find((c) => c.id === activeId) ?? null;
-  const activeOrders = active ? ordersByClient(orders, active.id) : [];
+  const activeOrders = active ? storeOrders.filter((o) => o.clientId === active.id) : [];
 
   const statusFilters: (ClientStatus | "Wszyscy")[] = ["Wszyscy", "Aktywny", "Lead", "Nieaktywny"];
 
@@ -72,7 +78,7 @@ export function ClientsScreen({ orders }: Props) {
         <div className="px-8 pt-8 pb-4 flex items-start justify-between">
           <div>
             <h1 className="text-[22px] font-bold !text-white tracking-tight">Klienci</h1>
-            <p className="mt-0.5 text-[13px] text-[#666]">
+            <p className="mt-0.5 text-[13px] text-white">
               Panel zarządzania klientami i kontrahentami.
             </p>
           </div>
@@ -90,7 +96,7 @@ export function ClientsScreen({ orders }: Props) {
           {/* Search */}
           <div className="relative w-72">
             <svg
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#555]"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white"
               viewBox="0 0 16 16"
               fill="none"
             >
@@ -117,7 +123,7 @@ export function ClientsScreen({ orders }: Props) {
                   "rounded-full px-3 py-1 text-[12px] font-medium transition-colors",
                   statusFilter === s
                     ? "bg-white text-black"
-                    : "bg-[#1f1f1f] text-[#888] hover:bg-[#2a2a2a] hover:text-white border border-[#2a2a2a]"
+                    : "bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] hover:text-white border border-[#2a2a2a]"
                 )}
               >
                 {s}
@@ -130,9 +136,9 @@ export function ClientsScreen({ orders }: Props) {
         <div className="flex-1 overflow-auto px-8 pb-8">
           <div className="min-w-[720px] rounded-xl border border-[#222] overflow-hidden">
             {/* Table head */}
-            <div className="grid grid-cols-[2fr_2fr_2fr_1.2fr_1fr_1fr_auto] border-b border-[#222] bg-[#161616] px-5 py-3">
+            <div className="grid grid-cols-[2fr_2fr_2fr_1.2fr_1fr_1fr_auto] items-center border-b border-[#222] bg-[#161616] px-5 py-3">
               {["Klient", "Email", "Telefon", "Status", "Typ", "Zlecenia", ""].map((h) => (
-                <span key={h} className="text-[12px] font-semibold text-[#555] uppercase tracking-wider">
+                <span key={h} className="text-[12px] font-semibold text-white uppercase tracking-wider">
                   {h}
                 </span>
               ))}
@@ -142,16 +148,16 @@ export function ClientsScreen({ orders }: Props) {
             {clients.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 py-16 bg-[#161616]">
                 <span className="text-3xl">👥</span>
-                <p className="text-[14px] text-[#555]">Brak klientów. Dodaj pierwszego!</p>
+                <p className="text-[14px] text-white">Brak klientów. Dodaj pierwszego!</p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 py-16 bg-[#161616]">
                 <span className="text-3xl">🔍</span>
-                <p className="text-[14px] text-[#555]">Brak wyników</p>
+                <p className="text-[14px] text-white">Brak wyników</p>
               </div>
             ) : (
               filtered.map((client, i) => {
-                const orderCount = ordersByClient(orders, client.id).length;
+                const orderCount = storeOrders.filter((o) => o.clientId === client.id).length;
                 const isActive = client.id === activeId;
                 return (
                   <div
@@ -182,28 +188,28 @@ export function ClientsScreen({ orders }: Props) {
                     </button>
 
                     {/* Email */}
-                    <span className="truncate text-[13px] text-[#888] pr-4">
+                    <span className="truncate text-[13px] text-white pr-4">
                       {client.email ?? "—"}
                     </span>
 
                     {/* Telefon */}
-                    <span className="truncate text-[13px] text-[#888] pr-4">
+                    <span className="truncate text-[13px] text-white pr-4">
                       {client.phone ?? "—"}
                     </span>
 
                     {/* Status */}
-                    <div>
+                    <div className="flex items-center">
                       <ClientStatusBadge status={client.status} />
                     </div>
 
                     {/* Typ */}
-                    <div>
+                    <div className="flex items-center">
                       <TypePill type={client.type} />
                     </div>
 
                     {/* Zlecenia */}
                     <span className="text-[13px] font-semibold text-white">
-                      {orderCount > 0 ? orderCount : <span className="text-[#444]">—</span>}
+                      {orderCount > 0 ? orderCount : <span className="text-white">—</span>}
                     </span>
 
                     {/* Actions */}
@@ -212,7 +218,7 @@ export function ClientsScreen({ orders }: Props) {
                         type="button"
                         onClick={() => openEdit(client)}
                         title="Edytuj"
-                        className="flex h-7 w-7 items-center justify-center rounded-md text-[#555] hover:text-white hover:bg-[#2a2a2a] transition-colors"
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-white hover:text-white hover:bg-[#2a2a2a] transition-colors"
                       >
                         <EditIcon />
                       </button>
@@ -220,7 +226,7 @@ export function ClientsScreen({ orders }: Props) {
                         type="button"
                         onClick={() => handleDelete(client.id)}
                         title="Usuń"
-                        className="flex h-7 w-7 items-center justify-center rounded-md text-[#555] hover:text-red-400 hover:bg-[#2a1a1a] transition-colors"
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-white hover:text-red-400 hover:bg-[#2a1a1a] transition-colors"
                       >
                         <TrashIcon />
                       </button>
@@ -270,10 +276,19 @@ type FormState = {
   email: string;
   phone: string;
   address: string;
+  nip: string;
   notes: string;
   status: ClientStatus;
   tags: string;
 };
+
+function validateNip(nip: string): boolean {
+  const digits = nip.replace(/[\s\-]/g, "");
+  if (!/^\d{10}$/.test(digits)) return false;
+  const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
+  const sum = weights.reduce((acc, w, i) => acc + w * Number(digits[i]), 0);
+  return sum % 11 === Number(digits[9]);
+}
 
 function ClientForm({
   initial,
@@ -292,11 +307,37 @@ function ClientForm({
     email: initial?.email ?? "",
     phone: initial?.phone ?? "",
     address: initial?.address ?? "",
+    nip: initial?.nip ?? "",
     notes: initial?.notes ?? "",
     status: initial?.status ?? "Aktywny",
     tags: initial?.tags?.join(", ") ?? "",
   });
   const [error, setError] = useState<string | null>(null);
+  const [nipStatus, setNipStatus] = useState<"idle" | "loading" | "found" | "not_found" | "invalid">("idle");
+
+  const lookupNip = async (rawNip: string) => {
+    const nip = rawNip.replace(/[\s\-]/g, "");
+    if (!validateNip(nip)) {
+      setNipStatus(nip.length === 10 ? "invalid" : "idle");
+      return;
+    }
+    setNipStatus("loading");
+    try {
+      const res = await fetch(`/api/nip?nip=${nip}`);
+      if (!res.ok) { setNipStatus("not_found"); return; }
+      const data = await res.json();
+      setForm((f) => ({
+        ...f,
+        companyName: data.name ?? f.companyName,
+        address: data.address ?? f.address,
+        name: f.name || data.name || f.name,
+        type: "Firma",
+      }));
+      setNipStatus("found");
+    } catch {
+      setNipStatus("not_found");
+    }
+  };
 
   const set = (key: keyof FormState, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -311,6 +352,7 @@ function ClientForm({
       email: form.email.trim() || undefined,
       phone: form.phone.trim() || undefined,
       address: form.address.trim() || undefined,
+      nip: form.nip.trim() || undefined,
       notes: form.notes.trim() || undefined,
       status: form.status,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : undefined,
@@ -328,7 +370,7 @@ function ClientForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e1e1e] text-[#666] hover:text-white transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e1e1e] text-white hover:text-white transition-colors"
         >
           <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
             <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -386,6 +428,57 @@ function ClientForm({
           <input className={INPUT_CLS} value={form.address} onChange={(e) => set("address", e.target.value)} placeholder="ul. …" />
         </FormField>
 
+        <FormField label="NIP">
+          <div className="relative">
+            <input
+              className={cn(
+                INPUT_CLS,
+                "pr-8",
+                nipStatus === "found" && "border-green-700 focus:border-green-600",
+                nipStatus === "invalid" && "border-red-800 focus:border-red-700",
+              )}
+              value={form.nip}
+              onChange={(e) => {
+                set("nip", e.target.value);
+                setNipStatus("idle");
+              }}
+              onBlur={(e) => lookupNip(e.target.value)}
+              placeholder="000-000-00-00"
+            />
+            <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
+              {nipStatus === "loading" && (
+                <svg className="h-3.5 w-3.5 animate-spin text-white" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeDasharray="20 10" />
+                </svg>
+              )}
+              {nipStatus === "found" && (
+                <svg className="h-3.5 w-3.5 text-green-400" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+              {nipStatus === "invalid" && (
+                <svg className="h-3.5 w-3.5 text-red-400" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 4v4M8 11v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              )}
+              {nipStatus === "not_found" && (
+                <svg className="h-3.5 w-3.5 text-yellow-400" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 4v4M8 11v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              )}
+            </div>
+          </div>
+          {nipStatus === "found" && (
+            <p className="mt-1 text-[11px] text-green-400">Dane firmy załadowane z rejestru MF</p>
+          )}
+          {nipStatus === "not_found" && (
+            <p className="mt-1 text-[11px] text-yellow-400">Nie znaleziono firmy w rejestrze VAT</p>
+          )}
+          {nipStatus === "invalid" && (
+            <p className="mt-1 text-[11px] text-red-400">Nieprawidłowy NIP (błąd sumy kontrolnej)</p>
+          )}
+        </FormField>
+
         <FormField label="Tagi (oddzielone przecinkami)">
           <input className={INPUT_CLS} value={form.tags} onChange={(e) => set("tags", e.target.value)} placeholder="stały, agencja, B2B" />
         </FormField>
@@ -411,7 +504,7 @@ function ClientForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 rounded-lg border border-[#2a2a2a] py-2 text-[13px] font-medium text-[#888] hover:text-white hover:border-[#444] transition-colors"
+          className="flex-1 rounded-lg border border-[#2a2a2a] py-2 text-[13px] font-medium text-white hover:text-white hover:border-[#444] transition-colors"
         >
           Anuluj
         </button>
@@ -433,7 +526,7 @@ const INPUT_CLS =
 function FormField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1">
-      <label className="block text-[11px] font-medium uppercase tracking-wider text-[#555]">{label}</label>
+      <label className="block text-[11px] font-medium uppercase tracking-wider text-white">{label}</label>
       {children}
     </div>
   );
@@ -449,7 +542,7 @@ function ClientDetail({
   onDelete,
 }: {
   client: Client;
-  orders: Order[];
+  orders: OrderDetail[];
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -467,10 +560,10 @@ function ClientDetail({
               {client.name}
             </h2>
             {client.companyName && client.companyName !== client.name && (
-              <p className="mt-0.5 text-[12px] text-[#666]">{client.companyName}</p>
+              <p className="mt-0.5 text-[12px] text-white">{client.companyName}</p>
             )}
             {client.contactPerson && (
-              <p className="mt-0.5 text-[12px] text-[#555]">{client.contactPerson}</p>
+              <p className="mt-0.5 text-[12px] text-white">{client.contactPerson}</p>
             )}
           </div>
         </div>
@@ -479,7 +572,7 @@ function ClientDetail({
             type="button"
             onClick={onEdit}
             title="Edytuj"
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e1e1e] text-[#666] hover:text-white transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e1e1e] text-white hover:text-white transition-colors"
           >
             <EditIcon />
           </button>
@@ -487,14 +580,14 @@ function ClientDetail({
             type="button"
             onClick={onDelete}
             title="Usuń"
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e1e1e] text-[#666] hover:text-red-400 hover:bg-[#2a1a1a] transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1e1e1e] text-white hover:text-red-400 hover:bg-[#2a1a1a] transition-colors"
           >
             <TrashIcon />
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1e1e1e] text-[#666] hover:text-white transition-colors"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1e1e1e] text-white hover:text-white transition-colors"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
               <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -515,7 +608,7 @@ function ClientDetail({
           {client.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-[#1e1e1e] px-2.5 py-0.5 text-[11px] font-medium text-[#777] border border-[#2a2a2a]"
+              className="rounded-full bg-[#1e1e1e] px-2.5 py-0.5 text-[11px] font-medium text-white border border-[#2a2a2a]"
             >
               #{tag}
             </span>
@@ -529,20 +622,21 @@ function ClientDetail({
           <DetailField icon={<EmailIcon />} label="E-mail" value={client.email} href={client.email ? `mailto:${client.email}` : undefined} />
           <DetailField icon={<PhoneIcon />} label="Telefon" value={client.phone} href={client.phone ? `tel:${client.phone}` : undefined} />
           {client.address && <DetailField icon={<PinIcon />} label="Adres" value={client.address} />}
+          {client.nip && <DetailField icon={<NipIcon />} label="NIP" value={client.nip} />}
         </div>
       </DetailSection>
 
       {/* Notes */}
       {client.notes && (
         <DetailSection title="Notatki">
-          <p className="text-[13px] leading-relaxed text-[#888] whitespace-pre-wrap">{client.notes}</p>
+          <p className="text-[13px] leading-relaxed text-white whitespace-pre-wrap">{client.notes}</p>
         </DetailSection>
       )}
 
       {/* Orders */}
       <DetailSection title="Zlecenia" badge={orders.length}>
         {orders.length === 0 ? (
-          <p className="text-[13px] text-[#555] italic">Brak zleceń.</p>
+          <p className="text-[13px] text-white italic">Brak zleceń.</p>
         ) : (
           <div className="space-y-2">
             {orders.map((order) => (
@@ -555,22 +649,44 @@ function ClientDetail({
   );
 }
 
-function ClientOrderRow({ order }: { order: Order }) {
-  const overdue = isOverdue(order);
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  draft: "Szkic",
+  quote_sent: "Wycena",
+  quote_accepted: "Przyjęta",
+  in_production: "W realizacji",
+  ready_for_pickup: "Gotowe",
+  delivered: "Dostarczone",
+  invoiced: "Zafakturowane",
+  completed: "Zakończone",
+  cancelled: "Anulowane",
+};
+
+function ClientOrderRow({ order }: { order: OrderDetail }) {
+  const deadline = order.requestedDeadline ?? null;
+  const overdue =
+    deadline &&
+    order.status !== "completed" &&
+    order.status !== "cancelled" &&
+    new Date(deadline) < new Date();
+  const total = order.finalTotal ?? order.estimatedTotal;
+  const totalPLN = total ? total.amount / 100 : null;
+  const statusLabel = ORDER_STATUS_LABELS[order.status] ?? order.status;
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-[#222] bg-[#161616] px-3.5 py-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] text-[#555]">{order.number}</span>
-          <OrderStatusPill status={order.status} />
+          <span className="font-mono text-[10px] text-white">{order.orderNumber}</span>
+          <OrderStatusPill status={statusLabel} />
         </div>
         <p className="mt-0.5 text-[12px] font-medium text-white truncate">{order.title}</p>
       </div>
       <div className="shrink-0 text-right">
-        <p className="text-[13px] font-bold text-white">{formatPLN(grossAmount(order))}</p>
-        {order.clientDeadline && (
-          <p className={cn("text-[11px]", overdue ? "font-semibold text-red-400" : "text-[#555]")}>
-            {formatDatePL(order.clientDeadline)}
+        {totalPLN !== null && (
+          <p className="text-[13px] font-bold text-white">{formatPLN(totalPLN)}</p>
+        )}
+        {deadline && (
+          <p className={cn("text-[11px]", overdue ? "font-semibold text-red-400" : "text-white")}>
+            {formatDatePL(deadline)}
             {overdue && " ⚠"}
           </p>
         )}
@@ -595,7 +711,7 @@ function DetailSection({
       <div className="flex items-center justify-between border-b border-[#1e1e1e] px-4 py-2.5">
         <h3 className="text-[12px] font-semibold text-white uppercase tracking-wider">{title}</h3>
         {badge !== undefined && (
-          <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold", badge > 0 ? "bg-white/10 text-white" : "bg-[#1e1e1e] text-[#555]")}>
+          <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold", badge > 0 ? "bg-white/10 text-white" : "bg-[#1e1e1e] text-white")}>
             {badge}
           </span>
         )}
@@ -618,11 +734,11 @@ function DetailField({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1e1e1e] text-[#666] mt-0.5">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1e1e1e] text-white mt-0.5">
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-[#555] leading-none mb-0.5">{label}</p>
+        <p className="text-[10px] font-medium uppercase tracking-wider text-white leading-none mb-0.5">{label}</p>
         {value ? (
           href ? (
             <a href={href} className="block truncate text-[13px] font-medium text-white hover:text-[#aaa] transition-colors">
@@ -632,7 +748,7 @@ function DetailField({
             <p className="truncate text-[13px] font-medium text-white">{value}</p>
           )
         ) : (
-          <p className="text-[12px] text-[#444] italic">Nie podano</p>
+          <p className="text-[12px] text-white italic">Nie podano</p>
         )}
       </div>
     </div>
@@ -644,7 +760,7 @@ function DetailField({
 const clientStatusConfig: Record<ClientStatus, { label: string; cls: string }> = {
   Aktywny: { label: "Aktywny", cls: "bg-[#1a3a2a] text-[#4ade80] border border-[#2a5a3a]" },
   Lead: { label: "Lead", cls: "bg-[#3a2a00] text-[#fbbf24] border border-[#5a4400]" },
-  Nieaktywny: { label: "Nieaktywny", cls: "bg-[#1e1e1e] text-[#666] border border-[#2a2a2a]" },
+  Nieaktywny: { label: "Nieaktywny", cls: "bg-[#1e1e1e] text-white border border-[#2a2a2a]" },
 };
 
 function ClientStatusBadge({ status }: { status: ClientStatus }) {
@@ -660,11 +776,11 @@ const orderStatusConfig: Record<string, string> = {
   Nowe: "bg-[#0a1a3a] text-[#60a5fa] border border-[#1a3a6a]",
   "W realizacji": "bg-[#1a1040] text-[#a78bfa] border border-[#2a2060]",
   Zakończone: "bg-[#1a3a2a] text-[#4ade80] border border-[#2a5a3a]",
-  Anulowane: "bg-[#1e1e1e] text-[#666] border border-[#2a2a2a]",
+  Anulowane: "bg-[#1e1e1e] text-white border border-[#2a2a2a]",
 };
 
 function OrderStatusPill({ status }: { status: string }) {
-  const cls = orderStatusConfig[status] ?? "bg-[#1e1e1e] text-[#666] border border-[#2a2a2a]";
+  const cls = orderStatusConfig[status] ?? "bg-[#1e1e1e] text-white border border-[#2a2a2a]";
   return (
     <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", cls)}>
       {status}
@@ -679,7 +795,7 @@ function TypePill({ type }: { type: Client["type"] }) {
         "inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium",
         type === "Firma"
           ? "bg-[#0f1f3a] text-[#60a5fa] border border-[#1a3a6a]"
-          : "bg-[#1e1e1e] text-[#888] border border-[#2a2a2a]"
+          : "bg-[#1e1e1e] text-white border border-[#2a2a2a]"
       )}
     >
       {type}
@@ -692,7 +808,7 @@ function ClientAvatar({ name, active }: { name: string; active: boolean }) {
     <span
       className={cn(
         "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold select-none transition-colors",
-        active ? "bg-white text-black" : "bg-[#1e1e1e] text-[#888]"
+        active ? "bg-white text-black" : "bg-[#1e1e1e] text-white"
       )}
     >
       {initials(name)}
@@ -760,6 +876,15 @@ function PinIcon() {
         strokeLinejoin="round"
       />
       <circle cx="8" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function NipIcon() {
+  return (
+    <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none">
+      <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4 8h2M7 8h2M10 8h2M4 10.5h3M9 10.5h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   );
 }

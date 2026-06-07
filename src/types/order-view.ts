@@ -2,6 +2,7 @@
 // The data layer maps complex domain types to these before passing them to UI components.
 
 export type ViewClient = {
+  id: string;
   name: string;
   companyName?: string;
   taxId?: string;
@@ -34,6 +35,9 @@ export type OrderView = {
   number: string;
   title: string;
   description?: string;
+  productId?: string;
+  status?: string;
+  priority?: string;
   client: ViewClient;
   clientDeadline?: string | null;
   plannedDeadline?: string | null;

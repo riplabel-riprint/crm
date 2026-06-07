@@ -21,11 +21,14 @@ export type DraftItem = {
 
 // ─── Full form state (across all 4 steps) ────────────────────────────────────
 
+export type SelectedProduct = { productId: string; qty: number };
+
 export type OrderFormState = {
   // Step 1 — client + service + product
   clientId: string;
   serviceId: string;
   productId: string;
+  selectedProducts: SelectedProduct[];
 
   // Step 2 — variant + input options + spec options
   variantId: string;
@@ -42,12 +45,16 @@ export type OrderFormState = {
 
   // Step 4 — notes (confirm before submit)
   notes: string;
+
+  // Product attribute values — keyed by productId → { attrName: value }
+  productAttributeValues: Record<string, Record<string, string | number | boolean | string[]>>;
 };
 
 export const INITIAL_FORM_STATE: OrderFormState = {
   clientId: "",
   serviceId: "",
   productId: "",
+  selectedProducts: [],
   variantId: "",
   inputOptions: {},
   specOptions: {},
@@ -58,6 +65,7 @@ export const INITIAL_FORM_STATE: OrderFormState = {
   vatRate: 23,
   items: [],
   notes: "",
+  productAttributeValues: {},
 };
 
 // ─── Service spec options registry ──────────────────────────────────────────

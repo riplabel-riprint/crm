@@ -1,34 +1,55 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import type { TodoTask, TodoPriority } from "@/types/todo-task";
+import type { TodoTask, TodoPriority, TodoCategory } from "@/types/todo-task";
 
-const KEY = "riprint_todos_v1";
+const TASKS_KEY = "riprint_todos_v1";
+const CATS_KEY = "riprint_todo_categories_v1";
 
-function load(): TodoTask[] {
+function loadTasks(): TodoTask[] {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return JSON.parse(localStorage.getItem(TASKS_KEY) ?? "[]");
   } catch {
     return [];
   }
 }
 
+function loadCategories(): TodoCategory[] {
+  try {
+    const saved = localStorage.getItem(CATS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
 export function useTodoTasks() {
   const [tasks, setRaw] = useState<TodoTask[]>([]);
+  const [categories, setCatsRaw] = useState<TodoCategory[]>([]);
 
   useEffect(() => {
-    setRaw(load());
+    setRaw(loadTasks());
+    setCatsRaw(loadCategories());
   }, []);
 
   const set = useCallback((fn: (p: TodoTask[]) => TodoTask[]) => {
     setRaw((prev) => {
       const next = fn(prev);
-      localStorage.setItem(KEY, JSON.stringify(next));
+      localStorage.setItem(TASKS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const setCats = useCallback((fn: (p: TodoCategory[]) => TodoCategory[]) => {
+    setCatsRaw((prev) => {
+      const next = fn(prev);
+      localStorage.setItem(CATS_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
 
   const addTask = useCallback(
-    (title: string, priority: TodoPriority, dueDate: string) => {
+    (title: string, priority: TodoPriority, dueDate: string, categoryId?: string) => {
       set((prev) => [
         ...prev,
         {
@@ -39,6 +60,7 @@ export function useTodoTasks() {
           done: false,
           createdAt: new Date().toISOString(),
           checklist: [],
+          categoryId,
         },
       ]);
     },
@@ -121,8 +143,34 @@ export function useTodoTasks() {
     [set]
   );
 
+  const addCategory = useCallback(
+    (name: string, color: string, icon: string) => {
+      setCats((prev) => [
+        ...prev,
+        { id: `cat_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, name, color, icon },
+      ]);
+    },
+    [setCats]
+  );
+
+  const updateCategory = useCallback(
+    (id: string, updates: Partial<Omit<TodoCategory, "id">>) => {
+      setCats((prev) => prev.map((c) => (c.id !== id ? c : { ...c, ...updates })));
+    },
+    [setCats]
+  );
+
+  const deleteCategory = useCallback(
+    (id: string) => {
+      setCats((prev) => prev.filter((c) => c.id !== id));
+      set((prev) => prev.map((t) => (t.categoryId === id ? { ...t, categoryId: undefined } : t)));
+    },
+    [setCats, set]
+  );
+
   return {
     tasks,
+    categories,
     addTask,
     toggleTask,
     deleteTask,
@@ -130,5 +178,8 @@ export function useTodoTasks() {
     toggleChecklist,
     addChecklist,
     deleteChecklist,
+    addCategory,
+    updateCategory,
+    deleteCategory,
   };
 }

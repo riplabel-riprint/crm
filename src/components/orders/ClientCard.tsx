@@ -19,16 +19,16 @@ export function ClientCard({ client }: { client: ViewClient }) {
       </CardHeader>
       <CardBody className="space-y-3 text-sm">
         <div>
-          <p className="font-medium text-gray-900">{client.name}</p>
+          <p className="font-medium text-white/90">{client.name}</p>
           {client.companyName && client.companyName !== client.name && (
-            <p className="text-gray-500">{client.companyName}</p>
+            <p className="text-white/50">{client.companyName}</p>
           )}
           {client.taxId && (
-            <p className="text-gray-400 text-xs">NIP: {client.taxId}</p>
+            <p className="text-white/30 text-xs">NIP: {client.taxId}</p>
           )}
         </div>
 
-        <div className="space-y-1 text-gray-600">
+        <div className="space-y-1 text-white/60">
           {client.email && <Row label="E-mail" value={client.email} />}
           {client.phone && <Row label="Tel." value={client.phone} />}
           {client.address && <Row label="Adres" value={client.address} />}
@@ -45,7 +45,7 @@ export function ClientCard({ client }: { client: ViewClient }) {
         )}
 
         {client.notes && (
-          <p className="rounded-md bg-gray-50 p-2 text-xs text-gray-500 italic leading-relaxed">
+          <p className="rounded-md bg-white/[0.04] p-2 text-xs text-white/40 italic leading-relaxed">
             {client.notes}
           </p>
         )}
@@ -57,8 +57,8 @@ export function ClientCard({ client }: { client: ViewClient }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex gap-2">
-      <span className="w-12 shrink-0 text-gray-400">{label}</span>
-      <span className="text-gray-700">{value}</span>
+      <span className="w-12 shrink-0 text-white/30">{label}</span>
+      <span className="text-white/70">{value}</span>
     </div>
   );
 }

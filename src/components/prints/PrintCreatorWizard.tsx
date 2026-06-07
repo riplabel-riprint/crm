@@ -9,7 +9,7 @@ export function PrintCreatorWizard() {
   const config = usePrintCreator((state) => state.config);
 
   return (
-    <div className="flex h-screen gap-6 p-6 bg-gray-50">
+    <div className="flex h-screen gap-6 p-6 bg-[var(--background)]">
       {/* Left Panel - Options */}
       <div className="w-80 shrink-0 overflow-y-auto">
         <PrintOptionsPanel />

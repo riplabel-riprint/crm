@@ -8,12 +8,9 @@ import type {
   ServiceStage,
   ServiceTask,
   ServiceCategoryDef,
+  Product,
 } from "@/types";
-import {
-  mockServices,
-  mockServiceFields,
-  mockOrderServiceConfigurations,
-} from "@/lib/mock-data";
+import { SERVICE_SPEC_OPTIONS, type SpecOptionDef } from "@/lib/business/order-form-types";
 
 export const DEFAULT_CATEGORIES: ServiceCategoryDef[] = [
   { id: "print_large_format", label: "Druk wielkoformatowy", colorClasses: "bg-blue-50 text-blue-700" },
@@ -25,13 +22,17 @@ export const DEFAULT_CATEGORIES: ServiceCategoryDef[] = [
   { id: "other",              label: "Inne",                  colorClasses: "bg-slate-100 text-slate-600" },
 ];
 
+export type { SpecOptionDef };
+
 type ServicesState = {
   services: Service[];
   fields: ServiceField[];
   configurations: OrderServiceConfiguration[];
   productAssignments: ServiceProductAssignment[];
+  products: Product[];
   stages: ServiceStage[];
   categories: ServiceCategoryDef[];
+  serviceSpecDefs: Record<string, SpecOptionDef[]>;
 
   // Service actions
   addService: (service: Service) => void;
@@ -50,6 +51,15 @@ type ServicesState = {
   updateConfiguration: (id: string, values: OrderServiceConfiguration["values"]) => void;
   deleteConfiguration: (id: string) => void;
 
+  // Product actions
+  addProduct: (product: Product) => void;
+  updateProduct: (id: string, updates: Partial<Omit<Product, "id" | "serviceId">>) => void;
+  deleteProduct: (id: string) => void;
+
+  // Catalog product linking
+  linkProduct: (serviceId: string, productId: string) => void;
+  unlinkProduct: (serviceId: string, productId: string) => void;
+
   // Product assignment actions
   setProductAssignments: (serviceId: string, products: ServiceProductAssignment[]) => void;
   deleteProductAssignmentsForService: (serviceId: string) => void;
@@ -62,17 +72,25 @@ type ServicesState = {
   addCategory: (cat: ServiceCategoryDef) => void;
   updateCategory: (id: string, updates: Partial<Omit<ServiceCategoryDef, "id">>) => void;
   deleteCategory: (id: string) => void;
+
+  // Spec option group actions (per service)
+  setSpecDefs: (serviceId: string, defs: SpecOptionDef[]) => void;
+  addSpecDef: (serviceId: string, def: SpecOptionDef) => void;
+  updateSpecDef: (serviceId: string, key: string, def: SpecOptionDef) => void;
+  deleteSpecDef: (serviceId: string, key: string) => void;
 };
 
 export const useServicesStore = create<ServicesState>()(
   persist(
     (set, get) => ({
-      services: mockServices,
-      fields: mockServiceFields,
-      configurations: mockOrderServiceConfigurations,
+      services: [],
+      fields: [],
+      configurations: [],
       productAssignments: [],
+      products: [],
       stages: [],
       categories: DEFAULT_CATEGORIES,
+      serviceSpecDefs: SERVICE_SPEC_OPTIONS,
 
       addService: (service) =>
         set((s) => ({ services: [...s.services, service] })),
@@ -88,6 +106,7 @@ export const useServicesStore = create<ServicesState>()(
           fields: s.fields.filter((f) => f.serviceId !== id),
           configurations: s.configurations.filter((c) => c.serviceId !== id),
           productAssignments: s.productAssignments.filter((p) => p.serviceId !== id),
+          products: s.products.filter((p) => p.serviceId !== id),
           stages: s.stages.filter((st) => st.serviceId !== id),
         })),
 
@@ -151,6 +170,35 @@ export const useServicesStore = create<ServicesState>()(
           configurations: s.configurations.filter((c) => c.id !== id),
         })),
 
+      linkProduct: (serviceId, productId) =>
+        set((s) => ({
+          services: s.services.map((svc) =>
+            svc.id === serviceId
+              ? { ...svc, productIds: [...(svc.productIds ?? []).filter((id) => id !== productId), productId] }
+              : svc
+          ),
+        })),
+
+      unlinkProduct: (serviceId, productId) =>
+        set((s) => ({
+          services: s.services.map((svc) =>
+            svc.id === serviceId
+              ? { ...svc, productIds: (svc.productIds ?? []).filter((id) => id !== productId) }
+              : svc
+          ),
+        })),
+
+      addProduct: (product) =>
+        set((s) => ({ products: [...s.products, product] })),
+
+      updateProduct: (id, updates) =>
+        set((s) => ({
+          products: s.products.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+        })),
+
+      deleteProduct: (id) =>
+        set((s) => ({ products: s.products.filter((p) => p.id !== id) })),
+
       setProductAssignments: (serviceId, products) =>
         set((s) => ({
           productAssignments: [
@@ -187,6 +235,35 @@ export const useServicesStore = create<ServicesState>()(
 
       deleteCategory: (id) =>
         set((s) => ({ categories: s.categories.filter((c) => c.id !== id) })),
+
+      setSpecDefs: (serviceId, defs) =>
+        set((s) => ({ serviceSpecDefs: { ...s.serviceSpecDefs, [serviceId]: defs } })),
+
+      addSpecDef: (serviceId, def) =>
+        set((s) => ({
+          serviceSpecDefs: {
+            ...s.serviceSpecDefs,
+            [serviceId]: [...(s.serviceSpecDefs[serviceId] ?? []), def],
+          },
+        })),
+
+      updateSpecDef: (serviceId, key, def) =>
+        set((s) => ({
+          serviceSpecDefs: {
+            ...s.serviceSpecDefs,
+            [serviceId]: (s.serviceSpecDefs[serviceId] ?? []).map((d) =>
+              d.key === key ? def : d
+            ),
+          },
+        })),
+
+      deleteSpecDef: (serviceId, key) =>
+        set((s) => ({
+          serviceSpecDefs: {
+            ...s.serviceSpecDefs,
+            [serviceId]: (s.serviceSpecDefs[serviceId] ?? []).filter((d) => d.key !== key),
+          },
+        })),
     }),
     { name: "riprint-services-store" }
   )

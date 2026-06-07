@@ -4,10 +4,6 @@ import { OrdersScreen } from "@/components/orders/OrdersScreen";
 export const metadata = { title: "Zlecenia | Riprint" };
 
 export default async function OrdersPage() {
-  const [orders, stages, tasks] = await Promise.all([
-    getOrders(),
-    getStages(),
-    getTasks(),
-  ]);
-  return <OrdersScreen orders={orders} stages={stages} tasks={tasks} />;
+  const [seedOrders, stages, tasks] = await Promise.all([getOrders(), getStages(), getTasks()]);
+  return <OrdersScreen seedOrders={seedOrders} stages={stages} tasks={tasks} />;
 }

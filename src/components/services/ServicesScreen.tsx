@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/utils";
 import { useServicesStore } from "@/store/services-store";
+import { useProductsStore } from "@/store/products-store";
+import type { ProductItem } from "@/types/products";
+import type { SpecOptionDef } from "@/lib/business/order-form-types";
 import type {
   Service,
   ServiceField,
@@ -14,6 +17,8 @@ import type {
   ServiceCategoryDef,
   PricingModel,
   ServiceStage,
+  ServiceTask,
+  ServiceTaskDefaultStatus,
 } from "@/types";
 
 const PRICING_LABELS: Record<PricingModel, string> = {
@@ -122,7 +127,7 @@ export function ServicesScreen() {
           <button
             type="button"
             onClick={() => setCategoriesOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[12px] font-medium text-[#8d8d93] transition-colors hover:bg-white/[0.07] hover:text-white"
+            className="flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-white/[0.07] hover:text-white"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
               <circle cx="4" cy="4" r="1.5" stroke="currentColor" strokeWidth="1.3" />
@@ -135,7 +140,7 @@ export function ServicesScreen() {
           <button
             type="button"
             onClick={() => setServiceModal({ open: true, editId: null })}
-            className="flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[12px] font-medium text-[#8d8d93] transition-colors hover:bg-white/[0.07] hover:text-white"
+            className="flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.04] px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-white/[0.07] hover:text-white"
           >
             <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
               <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -163,12 +168,12 @@ export function ServicesScreen() {
           <div className="px-5 pt-5 pb-3">
             <div className="flex items-baseline justify-between mb-3">
               <span className="text-[13px] font-semibold text-white">Usługi</span>
-              <span className="text-[11px] font-medium text-[#8d8d93]">{services.length}</span>
+              <span className="text-[11px] font-medium text-white">{services.length}</span>
             </div>
             {/* Search */}
             <div className="relative">
               <svg
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#8d8d93]"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white"
                 viewBox="0 0 16 16" fill="none"
               >
                 <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.5" />
@@ -203,13 +208,13 @@ export function ServicesScreen() {
           <div className="flex-1 overflow-y-auto py-2 px-3">
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 px-4 py-12 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.05] text-[#8d8d93]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
                     <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
                     <path d="M7 9h10M7 13h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
                 </div>
-                <p className="text-[12px] font-medium text-[#8d8d93]">Brak usług</p>
+                <p className="text-[12px] font-medium text-white">Brak usług</p>
               </div>
             ) : (
               <ul className="space-y-1">
@@ -272,7 +277,7 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
         "rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors",
         active
           ? "bg-[#ff6a00] text-white"
-          : "bg-white/[0.05] text-[#8d8d93] hover:bg-white/[0.09] hover:text-white"
+          : "bg-white/[0.05] text-white hover:bg-white/[0.09] hover:text-white"
       )}
     >
       {label}
@@ -316,7 +321,7 @@ function ServiceListItem({
                 {cat.label}
               </span>
               {!service.isActive && (
-                <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-[#8d8d93]">nieaktywna</span>
+                <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-white">nieaktywna</span>
               )}
             </div>
             <p className="truncate text-[13px] font-semibold leading-tight text-white">
@@ -330,7 +335,7 @@ function ServiceListItem({
             <p className="text-[12px] font-semibold tabular-nums text-white">
               {formatMoney(service.basePrice)}
             </p>
-            <p className="text-[10px] text-[#8d8d93]">{PRICING_LABELS[service.pricingModel]}</p>
+            <p className="text-[10px] text-white">{PRICING_LABELS[service.pricingModel]}</p>
           </div>
         </div>
       </button>
@@ -340,7 +345,7 @@ function ServiceListItem({
 
 // ─── Service detail panel ─────────────────────────────────────────────────────
 
-type Tab = "stages" | "form" | "preview" | "orders";
+type Tab = "stages" | "products" | "spec" | "form" | "preview" | "orders";
 
 function ServiceDetailPanel({
   service,
@@ -351,8 +356,9 @@ function ServiceDetailPanel({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const { fields, stages, addField, updateField, deleteField, moveFieldUp, moveFieldDown, updateService, categories } =
+  const { fields, stages, addField, updateField, deleteField, moveFieldUp, moveFieldDown, updateService, categories, linkProduct, unlinkProduct, serviceSpecDefs, addSpecDef, updateSpecDef, deleteSpecDef } =
     useServicesStore();
+  const { products: catalogProducts } = useProductsStore();
   const cat = getCat(categories, service.category);
 
   const [activeTab, setActiveTab] = useState<Tab>("stages");
@@ -362,10 +368,17 @@ function ServiceDetailPanel({
     editId: null,
   });
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [productPickerOpen, setProductPickerOpen] = useState(false);
+  const [specModal, setSpecModal] = useState<{ open: boolean; editKey: string | null }>({ open: false, editKey: null });
+  const [deleteSpecKey, setDeleteSpecKey] = useState<string | null>(null);
 
   const serviceFields = fields
     .filter((f) => f.serviceId === service.id)
     .sort((a, b) => a.order - b.order);
+
+  const linkedProductIds = service.productIds ?? [];
+  const serviceProducts = catalogProducts.filter((p) => linkedProductIds.includes(p.id));
+  const serviceSpecOptions = serviceSpecDefs[service.id] ?? [];
 
   const serviceStages = stages
     .filter((s) => s.serviceId === service.id)
@@ -393,6 +406,8 @@ function ServiceDetailPanel({
 
   const TABS: { id: Tab; label: string }[] = [
     { id: "stages", label: "Etapy usługi" },
+    { id: "products", label: `Produkty (${serviceProducts.length})` },
+    { id: "spec", label: `Specyfikacja (${serviceSpecOptions.length})` },
     { id: "form", label: `Formularz (${serviceFields.length})` },
     { id: "preview", label: "Podgląd formularza" },
     { id: "orders", label: "Zlecenia" },
@@ -414,7 +429,7 @@ function ServiceDetailPanel({
                   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
                   service.isActive
                     ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                    : "border-white/[0.08] bg-white/[0.05] text-[#8d8d93]"
+                    : "border-white/[0.08] bg-white/[0.05] text-white"
                 )}
               >
                 {service.isActive ? "Aktywna" : "Nieaktywna"}
@@ -437,7 +452,7 @@ function ServiceDetailPanel({
                 <p className="text-[11px] text-white">Cena bazowa</p>
                 <p className="text-[15px] font-semibold tabular-nums text-white">
                   {formatMoney(service.basePrice)}
-                  <span className="ml-1 text-[11px] font-normal text-[#8d8d93]">
+                  <span className="ml-1 text-[11px] font-normal text-white">
                     {PRICING_LABELS[service.pricingModel]}
                   </span>
                 </p>
@@ -478,7 +493,7 @@ function ServiceDetailPanel({
             <button
               type="button"
               onClick={onEdit}
-              className="rounded-xl border border-white/[0.10] bg-white/[0.04] px-3 py-1.5 text-[12px] font-medium text-[#8d8d93] transition-colors hover:bg-white/[0.07] hover:text-white"
+              className="rounded-xl border border-white/[0.10] bg-white/[0.04] px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-white/[0.07] hover:text-white"
             >
               Edytuj
             </button>
@@ -508,7 +523,7 @@ function ServiceDetailPanel({
                   "px-4 py-3.5 text-[12px] font-medium transition-colors border-b-2",
                   activeTab === tab.id
                     ? "border-[#ff6a00] text-[#ff6a00]"
-                    : "border-transparent text-[#8d8d93] hover:text-white"
+                    : "border-transparent text-white hover:text-white"
                 )}
               >
                 {tab.label}
@@ -528,14 +543,56 @@ function ServiceDetailPanel({
                 </button>
               </div>
             )}
+            {activeTab === "products" && (
+              <div className="ml-auto flex items-center pr-4">
+                <button
+                  type="button"
+                  onClick={() => setProductPickerOpen(true)}
+                  className="flex items-center gap-1.5 rounded-xl bg-[#ff6a00] px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-[#ff6a00]/90"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  Powiąż produkt
+                </button>
+              </div>
+            )}
+            {activeTab === "spec" && (
+              <div className="ml-auto flex items-center pr-4">
+                <button
+                  type="button"
+                  onClick={() => setSpecModal({ open: true, editKey: null })}
+                  className="flex items-center gap-1.5 rounded-xl bg-[#ff6a00] px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-[#ff6a00]/90"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  Dodaj grupę opcji
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="p-5">
             {activeTab === "stages" && (
               <StagesTab
                 stages={serviceStages}
+                serviceId={service.id}
                 selectedId={selectedStage?.id ?? null}
                 onSelect={(id) => setSelectedStageId(id)}
+              />
+            )}
+            {activeTab === "products" && (
+              <ProductsTab
+                products={serviceProducts}
+                onUnlink={(id) => unlinkProduct(service.id, id)}
+              />
+            )}
+            {activeTab === "spec" && (
+              <SpecTab
+                defs={serviceSpecOptions}
+                onEdit={(key) => setSpecModal({ open: true, editKey: key })}
+                onDelete={setDeleteSpecKey}
               />
             )}
             {activeTab === "form" && (
@@ -563,7 +620,7 @@ function ServiceDetailPanel({
               <StageDetailCard stage={selectedStage} />
             ) : (
               <div className="flex flex-col items-center gap-2 py-6 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.05] text-[#8d8d93]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
                     <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
@@ -590,19 +647,19 @@ function ServiceDetailPanel({
               </span>
             </div>
             {serviceFields.length === 0 ? (
-              <p className="text-[12px] text-[#8d8d93]">Brak pól</p>
+              <p className="text-[12px] text-white">Brak pól</p>
             ) : (
               <ul className="space-y-1.5">
                 {serviceFields.slice(0, 4).map((f) => (
                   <li key={f.id} className="flex items-center justify-between gap-2">
                     <span className="truncate text-[12px] text-white">{f.label}</span>
-                    <span className="shrink-0 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-[#8d8d93]">
+                    <span className="shrink-0 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white">
                       {FIELD_TYPE_LABELS[f.type]}
                     </span>
                   </li>
                 ))}
                 {serviceFields.length > 4 && (
-                  <li className="text-[11px] text-[#8d8d93]">+{serviceFields.length - 4} więcej</li>
+                  <li className="text-[11px] text-white">+{serviceFields.length - 4} więcej</li>
                 )}
               </ul>
             )}
@@ -610,7 +667,7 @@ function ServiceDetailPanel({
               <button
                 type="button"
                 onClick={() => setActiveTab("form")}
-                className="mt-3 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2 text-[12px] font-medium text-[#8d8d93] transition-colors hover:bg-white/[0.06] hover:text-white"
+                className="mt-3 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2 text-[12px] font-medium text-white transition-colors hover:bg-white/[0.06] hover:text-white"
               >
                 Zobacz wszystkie pola
               </button>
@@ -641,89 +698,709 @@ function ServiceDetailPanel({
           onCancel={() => setDeleteConfirmId(null)}
         />
       )}
+
+      {productPickerOpen && (
+        <ProductPickerModal
+          allProducts={catalogProducts}
+          linkedIds={linkedProductIds}
+          onLink={(id) => linkProduct(service.id, id)}
+          onUnlink={(id) => unlinkProduct(service.id, id)}
+          onClose={() => setProductPickerOpen(false)}
+        />
+      )}
+
+      {specModal.open && (
+        <SpecModal
+          editDef={specModal.editKey ? serviceSpecOptions.find((d) => d.key === specModal.editKey) : undefined}
+          existingKeys={serviceSpecOptions.map((d) => d.key)}
+          onSave={(def) => {
+            if (specModal.editKey) {
+              updateSpecDef(service.id, specModal.editKey, def);
+            } else {
+              addSpecDef(service.id, def);
+            }
+            setSpecModal({ open: false, editKey: null });
+          }}
+          onClose={() => setSpecModal({ open: false, editKey: null })}
+        />
+      )}
+
+      {deleteSpecKey && (
+        <ConfirmDialog
+          message="Czy na pewno chcesz usunąć tę grupę opcji?"
+          confirmLabel="Usuń grupę"
+          onConfirm={() => {
+            deleteSpecDef(service.id, deleteSpecKey);
+            setDeleteSpecKey(null);
+          }}
+          onCancel={() => setDeleteSpecKey(null)}
+        />
+      )}
     </div>
   );
 }
 
-// ─── Stages tab ───────────────────────────────────────────────────────────────
+// ─── Products tab ─────────────────────────────────────────────────────────────
 
-function StagesTab({
-  stages,
-  selectedId,
-  onSelect,
+function ProductsTab({
+  products,
+  onUnlink,
 }: {
-  stages: ServiceStage[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
+  products: ProductItem[];
+  onUnlink: (id: string) => void;
 }) {
-  if (stages.length === 0) {
+  if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-[#8d8d93]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M9 12h6M9 16h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+            <rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+            <rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+            <rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
           </svg>
         </div>
-        <p className="text-[13px] font-medium text-white">Brak etapów workflow</p>
-        <p className="text-[12px] text-white/80">
-          Etapy definiuje się w Kreatorze nowej usługi
-        </p>
+        <p className="text-[13px] font-medium text-white">Brak powiązanych produktów</p>
+        <p className="text-[12px] text-white/60">Powiąż produkty z katalogu przyciskiem powyżej</p>
+      </div>
+    );
+  }
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {products.map((p) => (
+        <div
+          key={p.id}
+          className={cn(
+            "flex flex-col rounded-[14px] border p-4 transition-all",
+            p.isActive
+              ? "border-white/[0.10] bg-white/[0.03]"
+              : "border-white/[0.05] bg-white/[0.01] opacity-60"
+          )}
+        >
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <p className="text-[13px] font-semibold text-white leading-tight">{p.name}</p>
+            <span className={cn(
+              "shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-medium",
+              p.isActive
+                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                : "border-white/[0.08] bg-white/[0.04] text-white"
+            )}>
+              {p.isActive ? "Aktywny" : "Nieaktywny"}
+            </span>
+          </div>
+          {p.description && (
+            <p className="text-[11px] text-white/60 line-clamp-2 flex-1">{p.description}</p>
+          )}
+          {p.price && (
+            <p className="mt-2 text-[12px] font-semibold text-[#ff6a00]">
+              {formatMoney(p.price)}
+            </p>
+          )}
+          <div className="mt-3 flex items-center justify-end border-t border-white/[0.06] pt-3">
+            <IconBtn onClick={() => onUnlink(p.id)} title="Odepnij" hoverColor="hover:text-red-400 hover:bg-red-500/10">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none">
+                <path d="M9.5 6.5l-3 3M6.5 9.5l-3 3M10.5 5.5l3-3M6 4a2 2 0 012.828 0l3.172 3.172a2 2 0 010 2.828L10 12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            </IconBtn>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Product picker modal ──────────────────────────────────────────────────────
+
+function ProductPickerModal({
+  allProducts,
+  linkedIds,
+  onLink,
+  onUnlink,
+  onClose,
+}: {
+  allProducts: ProductItem[];
+  linkedIds: string[];
+  onLink: (id: string) => void;
+  onUnlink: (id: string) => void;
+  onClose: () => void;
+}) {
+  const [search, setSearch] = useState("");
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return allProducts.filter(
+      (p) => !q || p.name.toLowerCase().includes(q) || (p.sku ?? "").toLowerCase().includes(q)
+    );
+  }, [allProducts, search]);
+
+  return (
+    <Modal title="Powiąż produkty z katalogu" onClose={onClose}>
+      <div className="space-y-3">
+        <input
+          autoFocus
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Szukaj produktu…"
+          className={inputCls()}
+        />
+        {filtered.length === 0 ? (
+          <p className="py-6 text-center text-[12px] text-white/40">Brak produktów w katalogu</p>
+        ) : (
+          <div className="max-h-[360px] overflow-y-auto space-y-1 pr-1">
+            {filtered.map((p) => {
+              const linked = linkedIds.includes(p.id);
+              return (
+                <div
+                  key={p.id}
+                  className={cn(
+                    "flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 transition-all",
+                    linked ? "border-[#ff6a00]/30 bg-[#ff6a00]/5" : "border-white/[0.06] bg-white/[0.02]"
+                  )}
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-medium text-white">{p.name}</p>
+                    {p.sku && <p className="text-[11px] text-white/40">SKU: {p.sku}</p>}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {p.price && (
+                      <span className="text-[12px] text-[#ff6a00]">{formatMoney(p.price)}</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => linked ? onUnlink(p.id) : onLink(p.id)}
+                      className={cn(
+                        "rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors",
+                        linked
+                          ? "border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                          : "border-[#ff6a00]/30 bg-[#ff6a00]/10 text-[#ff6a00] hover:bg-[#ff6a00]/20"
+                      )}
+                    >
+                      {linked ? "Odepnij" : "Powiąż"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <div className="flex justify-end pt-1">
+          <button type="button" onClick={onClose} className={primaryBtn}>Gotowe</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── Spec tab ─────────────────────────────────────────────────────────────────
+
+function SpecTab({
+  defs,
+  onEdit,
+  onDelete,
+}: {
+  defs: SpecOptionDef[];
+  onEdit: (key: string) => void;
+  onDelete: (key: string) => void;
+}) {
+  if (defs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
+          <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+        <p className="text-[13px] font-medium text-white">Brak grup opcji specyfikacji</p>
+        <p className="text-[12px] text-white/60">Dodaj grupę przyciskiem powyżej</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {stages.map((stage, idx) => {
-        const isSelected = stage.id === selectedId;
-        return (
-          <button
-            key={stage.id}
-            type="button"
-            onClick={() => onSelect(stage.id)}
-            className={cn(
-              "group w-full rounded-[14px] border p-4 text-left transition-all duration-150",
-              isSelected
-                ? "border-[#ff6a00]/30 bg-[#ff6a00]/[0.06]"
-                : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.10] hover:bg-white/[0.04]"
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[12px] font-bold transition-colors",
-                  isSelected
-                    ? "bg-[#ff6a00] text-white"
-                    : "bg-white/[0.07] text-[#8d8d93] group-hover:bg-white/[0.10]"
-                )}
-              >
-                {idx + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn("text-[13px] font-semibold", isSelected ? "text-[#ff6a00]" : "text-white")}>
-                  {stage.name}
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#8d8d93]">
-                  {stage.tasks.length} {stage.tasks.length === 1 ? "zadanie" : stage.tasks.length < 5 ? "zadania" : "zadań"}
-                </p>
-              </div>
-              <span
-                className={cn(
-                  "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                  isSelected
-                    ? "border-[#ff6a00]/30 bg-[#ff6a00]/10 text-[#ff6a00]"
-                    : "border-white/[0.08] bg-white/[0.04] text-[#8d8d93]"
-                )}
-              >
-                Etap {idx + 1}
-              </span>
+    <div className="space-y-3">
+      {defs.map((def) => (
+        <div key={def.key} className="rounded-[14px] border border-white/[0.10] bg-white/[0.03] p-4">
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <div>
+              <p className="text-[13px] font-semibold text-white leading-tight">{def.label}</p>
+              <p className="text-[11px] text-white/40 mt-0.5 font-mono">{def.key}</p>
             </div>
-          </button>
-        );
-      })}
+            <div className="flex items-center gap-1">
+              <IconBtn onClick={() => onEdit(def.key)} title="Edytuj" hoverColor="hover:text-[#ff6a00] hover:bg-[#ff6a00]/10">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none">
+                  <path d="M11.333 2a1.886 1.886 0 012.667 2.667L5.333 13.333 2 14l.667-3.333L11.333 2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </IconBtn>
+              <IconBtn onClick={() => onDelete(def.key)} title="Usuń" hoverColor="hover:text-red-400 hover:bg-red-500/10">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 4h12M5.333 4V2.667h5.334V4M6.667 7.333v4M9.333 7.333v4M3.333 4l.667 9.333h8l.667-9.333" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </IconBtn>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {def.choices.map((c) => (
+              <span
+                key={c.value}
+                className={cn(
+                  "rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
+                  c.value === def.defaultValue
+                    ? "border-[#ff6a00]/30 bg-[#ff6a00]/10 text-[#ff6a00]"
+                    : "border-white/[0.10] bg-white/[0.04] text-white/70"
+                )}
+              >
+                {c.label}
+                {c.value === def.defaultValue && <span className="ml-1 opacity-60">✓</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
+  );
+}
+
+// ─── Spec modal ────────────────────────────────────────────────────────────────
+
+function SpecModal({
+  editDef,
+  existingKeys,
+  onSave,
+  onClose,
+}: {
+  editDef?: SpecOptionDef;
+  existingKeys: string[];
+  onSave: (def: SpecOptionDef) => void;
+  onClose: () => void;
+}) {
+  const [label, setLabel] = useState(editDef?.label ?? "");
+  const [key, setKey] = useState(editDef?.key ?? "");
+  const [keyManual, setKeyManual] = useState(!!editDef);
+  const [choices, setChoices] = useState<{ value: string; label: string }[]>(
+    editDef?.choices ?? [{ value: "", label: "" }]
+  );
+  const [defaultValue, setDefaultValue] = useState(editDef?.defaultValue ?? "");
+  const [touched, setTouched] = useState(false);
+
+  const derivedKey = keyManual ? key : slugify(label);
+  const effectiveKey = derivedKey || key;
+
+  const keyError = touched && !effectiveKey.trim() ? "Klucz jest wymagany" : null;
+  const keyDuplicate = touched && !editDef && existingKeys.includes(effectiveKey) ? "Ten klucz już istnieje" : null;
+  const labelError = touched && !label.trim() ? "Nazwa jest wymagana" : null;
+  const validChoices = choices.filter((c) => c.value.trim() && c.label.trim());
+  const choicesError = touched && validChoices.length < 2 ? "Dodaj co najmniej 2 opcje" : null;
+
+  const handleLabelChange = (v: string) => {
+    setLabel(v);
+    if (!keyManual) setKey(slugify(v));
+  };
+
+  const setChoice = (i: number, patch: Partial<{ value: string; label: string }>) =>
+    setChoices((cs) => cs.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
+
+  const addChoice = () => setChoices((cs) => [...cs, { value: "", label: "" }]);
+  const removeChoice = (i: number) => setChoices((cs) => cs.filter((_, idx) => idx !== i));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setTouched(true);
+    const k = effectiveKey.trim();
+    if (!label.trim() || !k || validChoices.length < 2) return;
+    const finalDefault = defaultValue && validChoices.some((c) => c.value === defaultValue)
+      ? defaultValue
+      : validChoices[0].value;
+    onSave({ key: k, label: label.trim(), choices: validChoices, defaultValue: finalDefault });
+  };
+
+  return (
+    <Modal title={editDef ? "Edytuj grupę opcji" : "Nowa grupa opcji"} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="mb-1.5 block text-[12px] font-medium text-white/60">Nazwa grupy *</label>
+          <input
+            autoFocus
+            value={label}
+            onChange={(e) => handleLabelChange(e.target.value)}
+            onBlur={() => setTouched(true)}
+            placeholder="np. Materiał"
+            className={inputCls(!!labelError)}
+          />
+          {labelError && <p className="mt-1 text-[11px] text-red-400">{labelError}</p>}
+        </div>
+        <div>
+          <label className="mb-1.5 block text-[12px] font-medium text-white/60">Klucz (ID) *</label>
+          <input
+            value={effectiveKey}
+            onChange={(e) => { setKey(e.target.value); setKeyManual(true); }}
+            onBlur={() => setTouched(true)}
+            placeholder="np. material"
+            className={inputCls(!!(keyError || keyDuplicate))}
+          />
+          {keyError && <p className="mt-1 text-[11px] text-red-400">{keyError}</p>}
+          {keyDuplicate && <p className="mt-1 text-[11px] text-red-400">{keyDuplicate}</p>}
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-[12px] font-medium text-white/60">Opcje *</label>
+            <button type="button" onClick={addChoice} className="text-[11px] text-[#ff6a00] hover:text-[#ff6a00]/80">
+              + Dodaj opcję
+            </button>
+          </div>
+          <div className="space-y-2">
+            {choices.map((c, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  value={c.value}
+                  onChange={(e) => setChoice(i, { value: slugify(e.target.value) || e.target.value })}
+                  placeholder="klucz"
+                  className={cn(inputCls(), "w-32 font-mono text-[11px]")}
+                />
+                <input
+                  value={c.label}
+                  onChange={(e) => setChoice(i, { label: e.target.value })}
+                  placeholder="Etykieta"
+                  className={cn(inputCls(), "flex-1")}
+                />
+                <button
+                  type="button"
+                  title="Domyślna"
+                  onClick={() => setDefaultValue(c.value)}
+                  className={cn(
+                    "shrink-0 rounded-full w-5 h-5 border text-[10px] flex items-center justify-center transition-colors",
+                    defaultValue === c.value
+                      ? "border-[#ff6a00] bg-[#ff6a00] text-white"
+                      : "border-white/20 text-white/40 hover:border-[#ff6a00]/50"
+                  )}
+                  title="Ustaw jako domyślną"
+                >
+                  ✓
+                </button>
+                {choices.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeChoice(i)}
+                    className="shrink-0 text-white/30 hover:text-red-400 text-lg leading-none"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          {choicesError && <p className="mt-1 text-[11px] text-red-400">{choicesError}</p>}
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className={secondaryBtn}>Anuluj</button>
+          <button type="submit" className={primaryBtn}>{editDef ? "Zapisz zmiany" : "Dodaj grupę"}</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+// ─── Stages tab ───────────────────────────────────────────────────────────────
+
+type StageModalData = { name: string; tasks: { id: string; name: string; required: boolean; defaultStatus: ServiceTaskDefaultStatus }[] };
+
+function StagesTab({
+  stages,
+  serviceId,
+  selectedId,
+  onSelect,
+}: {
+  stages: ServiceStage[];
+  serviceId: string;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  const { setStages } = useServicesStore();
+  const [stageModal, setStageModal] = useState<{ open: boolean; editId: string | null }>({ open: false, editId: null });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  function handleSaveStage(data: StageModalData) {
+    const editId = stageModal.editId;
+    if (editId) {
+      const updated = stages.map((s) =>
+        s.id === editId ? { ...s, name: data.name, tasks: data.tasks } : s
+      );
+      setStages(serviceId, updated);
+    } else {
+      const newStage: ServiceStage = {
+        id: `stage-${uid()}`,
+        serviceId,
+        name: data.name,
+        position: stages.length,
+        tasks: data.tasks,
+      };
+      setStages(serviceId, [...stages, newStage]);
+      onSelect(newStage.id);
+    }
+    setStageModal({ open: false, editId: null });
+  }
+
+  function handleDelete(id: string) {
+    const updated = stages
+      .filter((s) => s.id !== id)
+      .map((s, i) => ({ ...s, position: i }));
+    setStages(serviceId, updated);
+    setDeleteId(null);
+  }
+
+  function handleMoveUp(id: string) {
+    const idx = stages.findIndex((s) => s.id === id);
+    if (idx <= 0) return;
+    const arr = [...stages];
+    [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+    setStages(serviceId, arr.map((s, i) => ({ ...s, position: i })));
+  }
+
+  function handleMoveDown(id: string) {
+    const idx = stages.findIndex((s) => s.id === id);
+    if (idx < 0 || idx >= stages.length - 1) return;
+    const arr = [...stages];
+    [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+    setStages(serviceId, arr.map((s, i) => ({ ...s, position: i })));
+  }
+
+  const editStage = stageModal.editId ? stages.find((s) => s.id === stageModal.editId) : undefined;
+
+  return (
+    <>
+      <div className="space-y-2">
+        {stages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
+              <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M9 12h6M9 16h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </div>
+            <p className="text-[13px] font-medium text-white">Brak etapów workflow</p>
+            <p className="text-[12px] text-white/80">Dodaj pierwszy etap klikając przycisk poniżej</p>
+          </div>
+        ) : (
+          stages.map((stage, idx) => {
+            const isSelected = stage.id === selectedId;
+            return (
+              <div
+                key={stage.id}
+                className={cn(
+                  "group rounded-[14px] border transition-all duration-150",
+                  isSelected
+                    ? "border-[#ff6a00]/30 bg-[#ff6a00]/[0.06]"
+                    : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.10] hover:bg-white/[0.04]"
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => onSelect(stage.id)}
+                  className="w-full p-4 text-left"
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={cn(
+                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[12px] font-bold transition-colors",
+                        isSelected ? "bg-[#ff6a00] text-white" : "bg-white/[0.07] text-white group-hover:bg-white/[0.10]"
+                      )}
+                    >
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-[13px] font-semibold", isSelected ? "text-[#ff6a00]" : "text-white")}>
+                        {stage.name}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-white">
+                        {stage.tasks.length} {stage.tasks.length === 1 ? "zadanie" : stage.tasks.length < 5 ? "zadania" : "zadań"}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                        isSelected ? "border-[#ff6a00]/30 bg-[#ff6a00]/10 text-[#ff6a00]" : "border-white/[0.08] bg-white/[0.04] text-white"
+                      )}
+                    >
+                      Etap {idx + 1}
+                    </span>
+                  </div>
+                </button>
+                <div className="flex items-center gap-0.5 px-4 pb-3 pt-0">
+                  <IconBtn onClick={() => handleMoveUp(stage.id)} disabled={idx === 0} title="Przesuń wyżej">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 10V4M4 7l3-3 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </IconBtn>
+                  <IconBtn onClick={() => handleMoveDown(stage.id)} disabled={idx === stages.length - 1} title="Przesuń niżej">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 4v6M4 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </IconBtn>
+                  <IconBtn onClick={() => setStageModal({ open: true, editId: stage.id })} title="Edytuj etap" hoverColor="hover:text-[#ff6a00] hover:bg-[#ff6a00]/10">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+                      <path d="M9.5 2.5l2 2-7 7H2.5v-2l7-7z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </IconBtn>
+                  <IconBtn onClick={() => setDeleteId(stage.id)} title="Usuń etap" hoverColor="hover:text-red-400 hover:bg-red-500/10">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+                      <path d="M2 3.5h10M5.5 3.5V2h3v1.5M4 3.5l.7 8h4.6l.7-8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </IconBtn>
+                </div>
+              </div>
+            );
+          })
+        )}
+
+        <button
+          type="button"
+          onClick={() => setStageModal({ open: true, editId: null })}
+          className="flex w-full items-center justify-center gap-1.5 rounded-[14px] border-2 border-dashed border-white/[0.10] py-3 text-[13px] font-medium text-white transition-colors hover:border-[#ff6a00]/40 hover:text-[#ff6a00]"
+        >
+          <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+            <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          Dodaj etap
+        </button>
+      </div>
+
+      {stageModal.open && (
+        <StageModal
+          editStage={editStage}
+          onSave={handleSaveStage}
+          onClose={() => setStageModal({ open: false, editId: null })}
+        />
+      )}
+
+      {deleteId && (
+        <ConfirmDialog
+          message="Czy na pewno chcesz usunąć ten etap?"
+          confirmLabel="Usuń etap"
+          onConfirm={() => handleDelete(deleteId)}
+          onCancel={() => setDeleteId(null)}
+        />
+      )}
+    </>
+  );
+}
+
+// ─── Stage modal ──────────────────────────────────────────────────────────────
+
+type TaskRow = { id: string; name: string; required: boolean; defaultStatus: ServiceTaskDefaultStatus };
+
+function StageModal({
+  editStage,
+  onSave,
+  onClose,
+}: {
+  editStage?: ServiceStage;
+  onSave: (data: StageModalData) => void;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState(editStage?.name ?? "");
+  const [tasks, setTasks] = useState<TaskRow[]>(
+    editStage?.tasks.map((t) => ({ id: t.id, name: t.name, required: t.required, defaultStatus: t.defaultStatus })) ?? []
+  );
+  const [nameError, setNameError] = useState("");
+
+  function addTask() {
+    setTasks((ts) => [...ts, { id: uid(), name: "", required: false, defaultStatus: "pending" }]);
+  }
+
+  function updateTask(idx: number, key: keyof TaskRow, value: string | boolean) {
+    setTasks((ts) => ts.map((t, i) => (i === idx ? { ...t, [key]: value } : t)));
+  }
+
+  function removeTask(idx: number) {
+    setTasks((ts) => ts.filter((_, i) => i !== idx));
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) { setNameError("Nazwa etapu jest wymagana"); return; }
+    onSave({ name: name.trim(), tasks: tasks.filter((t) => t.name.trim()) });
+  }
+
+  return (
+    <Modal title={editStage ? "Edytuj etap" : "Nowy etap"} onClose={onClose} wide>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormField label="Nazwa etapu" error={nameError} required>
+          <input
+            autoFocus
+            type="text"
+            value={name}
+            onChange={(e) => { setName(e.target.value); setNameError(""); }}
+            placeholder="np. Przygotowanie pliku, Druk, Wykończenie…"
+            className={inputCls(!!nameError)}
+          />
+        </FormField>
+
+        <div className="rounded-[14px] border border-white/[0.08] p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-medium text-white">Zadania / checklista</p>
+            <button
+              type="button"
+              onClick={addTask}
+              className="flex items-center gap-1 text-[12px] font-medium text-[#ff6a00] hover:text-[#ff6a00]/80"
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+                <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Dodaj zadanie
+            </button>
+          </div>
+
+          {tasks.length === 0 ? (
+            <p className="text-[12px] italic text-white/60">Brak zadań — etap bez checklisty</p>
+          ) : (
+            <div className="space-y-2">
+              <div className="grid grid-cols-[1fr_90px_28px] gap-2 px-1">
+                <p className="text-[11px] text-white/60">Nazwa zadania</p>
+                <p className="text-[11px] text-white/60 text-center">Wymagane</p>
+                <span />
+              </div>
+              {tasks.map((task, idx) => (
+                <div key={task.id} className="grid grid-cols-[1fr_90px_28px] gap-2 items-center">
+                  <input
+                    type="text"
+                    value={task.name}
+                    onChange={(e) => updateTask(idx, "name", e.target.value)}
+                    placeholder="np. Weryfikacja pliku"
+                    className={inputCls()}
+                  />
+                  <div className="flex justify-center">
+                    <label className="flex cursor-pointer items-center gap-1.5">
+                      <input
+                        type="checkbox"
+                        checked={task.required}
+                        onChange={(e) => updateTask(idx, "required", e.target.checked)}
+                        className="h-4 w-4 rounded accent-[#ff6a00]"
+                      />
+                      <span className="text-[12px] text-white/70">wymagane</span>
+                    </label>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeTask(idx)}
+                    className="flex items-center justify-center rounded p-1 text-white/40 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
+                      <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
+          <button type="button" onClick={onClose} className={secondaryBtn}>Anuluj</button>
+          <button type="submit" className={primaryBtn}>
+            {editStage ? "Zapisz zmiany" : "Dodaj etap"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
@@ -739,7 +1416,7 @@ function StageDetailCard({ stage }: { stage: ServiceStage }) {
       <h3 className="text-[14px] font-semibold text-white">{stage.name}</h3>
       {stage.tasks.length > 0 && (
         <div className="mt-3 space-y-1.5">
-          <p className="text-[11px] text-[#8d8d93]">
+          <p className="text-[11px] text-white">
             Checklista · {requiredTasks} wymagane z {stage.tasks.length}
           </p>
           <ul className="space-y-1">
@@ -753,7 +1430,7 @@ function StageDetailCard({ stage }: { stage: ServiceStage }) {
                 />
                 <span className="text-[12px] text-white/80">{task.name}</span>
                 {task.required && (
-                  <span className="ml-auto text-[10px] text-[#8d8d93]">wymagane</span>
+                  <span className="ml-auto text-[10px] text-white">wymagane</span>
                 )}
               </li>
             ))}
@@ -782,14 +1459,14 @@ function FormularzTab({
   if (fields.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-[#8d8d93]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
             <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
             <path d="M7 9h10M7 13h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
-        <p className="text-[13px] font-medium text-[#8d8d93]">Brak pól formularza</p>
-        <p className="text-[12px] text-[#8d8d93]/60">
+        <p className="text-[13px] font-medium text-white">Brak pól formularza</p>
+        <p className="text-[12px] text-white/60">
           Dodaj pierwsze pole, aby zdefiniować formularz tej usługi
         </p>
       </div>
@@ -837,7 +1514,7 @@ function FieldRow({
   const hasOptions = HAS_OPTIONS.includes(field.type);
   return (
     <div className="flex items-center gap-3 rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-4 py-3 transition-colors hover:border-white/[0.10]">
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/[0.08] text-[11px] font-semibold text-[#8d8d93]">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/[0.08] text-[11px] font-semibold text-white">
         {position}
       </span>
 
@@ -845,7 +1522,7 @@ function FieldRow({
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[13px] font-semibold text-white">{field.label}</span>
           {field.required && <span className="text-red-400 text-[12px] font-bold">*</span>}
-          <span className="rounded-full bg-white/[0.07] px-2 py-0.5 text-[10px] font-medium text-[#8d8d93]">
+          <span className="rounded-full bg-white/[0.07] px-2 py-0.5 text-[10px] font-medium text-white">
             {FIELD_TYPE_LABELS[field.type]}
           </span>
           {field.required && (
@@ -855,9 +1532,9 @@ function FieldRow({
           )}
         </div>
         <div className="flex items-center gap-3 mt-0.5">
-          <p className="text-[11px] text-[#8d8d93] font-mono">{field.name}</p>
+          <p className="text-[11px] text-white font-mono">{field.name}</p>
           {hasOptions && field.options && (
-            <p className="text-[11px] text-[#8d8d93]">
+            <p className="text-[11px] text-white">
               {field.options.length}{" "}
               {field.options.length === 1 ? "opcja" : field.options.length < 5 ? "opcje" : "opcji"}
             </p>
@@ -911,7 +1588,7 @@ function IconBtn({
       disabled={disabled}
       title={title}
       className={cn(
-        "rounded p-1.5 text-[#8d8d93] transition-colors disabled:opacity-25",
+        "rounded p-1.5 text-white transition-colors disabled:opacity-25",
         !disabled && hoverColor
       )}
     >
@@ -925,7 +1602,7 @@ function IconBtn({
 function PodgladTab({ fields }: { fields: ServiceField[] }) {
   if (fields.length === 0) {
     return (
-      <p className="py-12 text-center text-[13px] text-[#8d8d93]">
+      <p className="py-12 text-center text-[13px] text-white">
         Brak pól — dodaj pola w zakładce „Formularz"
       </p>
     );
@@ -1006,7 +1683,7 @@ function FieldPreview({ field }: { field: ServiceField }) {
               <input type="checkbox" value={o.value} className="h-4 w-4 rounded accent-[#ff6a00]" />
               <span className="flex-1 text-[13px] text-white">{o.label}</span>
               {o.priceModifier != null && (
-                <span className="text-[11px] text-[#8d8d93]">+{o.priceModifier} zł</span>
+                <span className="text-[11px] text-white">+{o.priceModifier} zł</span>
               )}
             </label>
           ))}
@@ -1021,7 +1698,7 @@ function FieldPreview({ field }: { field: ServiceField }) {
               <input type="radio" name={`prev-${field.id}`} value={o.value} defaultChecked={field.defaultValue === o.value} className="h-4 w-4 accent-[#ff6a00]" />
               <span className="flex-1 text-[13px] text-white">{o.label}</span>
               {o.priceModifier != null && (
-                <span className="text-[11px] text-[#8d8d93]">+{o.priceModifier} zł</span>
+                <span className="text-[11px] text-white">+{o.priceModifier} zł</span>
               )}
             </label>
           ))}
@@ -1052,14 +1729,14 @@ function ZleceniaTab({ serviceId }: { serviceId: string }) {
   if (cfgs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-[#8d8d93]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
           <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none">
             <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.5" />
             <path d="M7 8h10M7 12h7M7 16h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
-        <p className="text-[13px] font-medium text-[#8d8d93]">Brak konfiguracji</p>
-        <p className="text-[12px] text-[#8d8d93]/60">
+        <p className="text-[13px] font-medium text-white">Brak konfiguracji</p>
+        <p className="text-[12px] text-white/60">
           Konfiguracje pojawią się tutaj po podpięciu usługi do zlecenia
         </p>
       </div>
@@ -1096,6 +1773,7 @@ type ServiceFormData = {
   basePricePLN: string;
   unit: string;
   description: string;
+  estimatedDays: string;
   isActive: boolean;
 };
 
@@ -1116,6 +1794,7 @@ function ServiceModal({
     basePricePLN: editService ? (editService.basePrice.amount / 100).toFixed(2) : "",
     unit: editService?.unit ?? "",
     description: editService?.description ?? "",
+    estimatedDays: editService?.estimatedDays != null ? String(editService.estimatedDays) : "",
     isActive: editService?.isActive ?? true,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ServiceFormData, string>>>({});
@@ -1133,6 +1812,7 @@ function ServiceModal({
     if (isNaN(price) || price < 0) errs.basePricePLN = "Podaj prawidłową cenę";
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
+    const days = parseInt(form.estimatedDays);
     onSave({
       name: form.name.trim(),
       category: form.category,
@@ -1140,7 +1820,9 @@ function ServiceModal({
       basePrice: { amount: Math.round(price * 100), currency: "PLN" },
       unit: form.unit.trim() || undefined,
       description: form.description.trim() || undefined,
+      estimatedDays: !isNaN(days) && days > 0 ? days : undefined,
       isActive: form.isActive,
+      productIds: [],
     });
   }
 
@@ -1205,6 +1887,17 @@ function ServiceModal({
             />
           </FormField>
         </div>
+
+        <FormField label="Przewidywany termin realizacji (dni roboczych)">
+          <input
+            type="number"
+            min="1"
+            value={form.estimatedDays}
+            onChange={(e) => set("estimatedDays", e.target.value)}
+            placeholder="np. 3"
+            className={inputCls()}
+          />
+        </FormField>
 
         <FormField label="Opis">
           <textarea
@@ -1454,13 +2147,13 @@ function FieldModal({
             </div>
 
             {form.options.length === 0 ? (
-              <p className="text-[12px] italic text-[#8d8d93]">Brak opcji — kliknij „Dodaj opcję"</p>
+              <p className="text-[12px] italic text-white">Brak opcji — kliknij „Dodaj opcję"</p>
             ) : (
               <div className="space-y-2">
                 <div className="grid grid-cols-[1fr_1fr_80px_28px] gap-2 px-1">
-                  <p className="text-[11px] text-[#8d8d93]">Etykieta</p>
-                  <p className="text-[11px] text-[#8d8d93]">Wartość (slug)</p>
-                  <p className="text-[11px] text-[#8d8d93] text-right">+cena (zł)</p>
+                  <p className="text-[11px] text-white">Etykieta</p>
+                  <p className="text-[11px] text-white">Wartość (slug)</p>
+                  <p className="text-[11px] text-white text-right">+cena (zł)</p>
                   <span />
                 </div>
                 {form.options.map((opt, idx) => (
@@ -1489,7 +2182,7 @@ function FieldModal({
                     <button
                       type="button"
                       onClick={() => removeOpt(idx)}
-                      className="flex items-center justify-center rounded p-1 text-[#8d8d93] hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                      className="flex items-center justify-center rounded p-1 text-white hover:bg-red-500/10 hover:text-red-400 transition-colors"
                     >
                       <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
                         <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -1540,7 +2233,7 @@ function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-[#8d8d93] hover:bg-white/[0.06] hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-white hover:bg-white/[0.06] hover:text-white transition-colors"
           >
             <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none">
               <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -1611,14 +2304,14 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="flex h-full items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.05] text-[#8d8d93]">
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.05] text-white">
           <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none">
             <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
             <path d="M7 9h10M7 13h6M7 17h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
         <p className="text-[14px] font-semibold text-white">Wybierz usługę z listy</p>
-        <p className="mt-1 text-[12px] text-[#8d8d93]">lub dodaj nową usługę</p>
+        <p className="mt-1 text-[12px] text-white">lub dodaj nową usługę</p>
         <button type="button" onClick={onAdd} className={cn(primaryBtn, "mt-4")}>
           Dodaj usługę
         </button>
@@ -1689,7 +2382,7 @@ function CategoriesModal({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-[#8d8d93] hover:bg-white/[0.06] hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-white hover:bg-white/[0.06] hover:text-white transition-colors"
           >
             <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none">
               <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -1711,7 +2404,7 @@ function CategoriesModal({ onClose }: { onClose: () => void }) {
                     className={inputCls()}
                   />
                   <div>
-                    <p className="mb-1.5 text-[11px] font-medium text-[#8d8d93]">Kolor</p>
+                    <p className="mb-1.5 text-[11px] font-medium text-white">Kolor</p>
                     <div className="flex flex-wrap gap-1.5">
                       {COLOR_OPTIONS.map((co) => (
                         <button
@@ -1746,12 +2439,12 @@ function CategoriesModal({ onClose }: { onClose: () => void }) {
                   <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium flex-1", cat.colorClasses)}>
                     {cat.label}
                   </span>
-                  <span className="text-[10px] font-mono text-[#8d8d93] flex-1">{cat.id}</span>
+                  <span className="text-[10px] font-mono text-white flex-1">{cat.id}</span>
                   <div className="flex items-center gap-0.5">
                     <button
                       type="button"
                       onClick={() => startEdit(cat)}
-                      className="rounded p-1.5 text-[#8d8d93] hover:text-[#ff6a00] hover:bg-[#ff6a00]/10 transition-colors"
+                      className="rounded p-1.5 text-white hover:text-[#ff6a00] hover:bg-[#ff6a00]/10 transition-colors"
                       title="Edytuj"
                     >
                       <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
@@ -1761,7 +2454,7 @@ function CategoriesModal({ onClose }: { onClose: () => void }) {
                     <button
                       type="button"
                       onClick={() => deleteCategory(cat.id)}
-                      className="rounded p-1.5 text-[#8d8d93] hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      className="rounded p-1.5 text-white hover:text-red-400 hover:bg-red-500/10 transition-colors"
                       title="Usuń kategorię"
                     >
                       <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
@@ -1775,7 +2468,7 @@ function CategoriesModal({ onClose }: { onClose: () => void }) {
           ))}
 
           {categories.length === 0 && (
-            <p className="py-6 text-center text-[13px] text-[#8d8d93]">Brak kategorii — dodaj pierwszą poniżej</p>
+            <p className="py-6 text-center text-[13px] text-white">Brak kategorii — dodaj pierwszą poniżej</p>
           )}
         </div>
 
@@ -1796,7 +2489,7 @@ function CategoriesModal({ onClose }: { onClose: () => void }) {
                 {error && <p className="mt-1 text-[11px] text-red-400">{error}</p>}
               </div>
               <div>
-                <p className="mb-1.5 text-[11px] font-medium text-[#8d8d93]">Kolor</p>
+                <p className="mb-1.5 text-[11px] font-medium text-white">Kolor</p>
                 <div className="flex flex-wrap gap-1.5">
                   {COLOR_OPTIONS.map((co) => (
                     <button
@@ -1830,7 +2523,7 @@ function CategoriesModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={() => setAddingNew(true)}
-              className="flex w-full items-center justify-center gap-1.5 rounded-[14px] border-2 border-dashed border-white/[0.10] py-3 text-[13px] font-medium text-[#8d8d93] transition-colors hover:border-[#ff6a00]/40 hover:text-[#ff6a00]"
+              className="flex w-full items-center justify-center gap-1.5 rounded-[14px] border-2 border-dashed border-white/[0.10] py-3 text-[13px] font-medium text-white transition-colors hover:border-[#ff6a00]/40 hover:text-[#ff6a00]"
             >
               <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none">
                 <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -1858,4 +2551,4 @@ const primaryBtn =
   "rounded-xl bg-[#ff6a00] px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[#ff6a00]/90";
 
 const secondaryBtn =
-  "rounded-xl border border-white/[0.10] bg-white/[0.04] px-4 py-2 text-[13px] font-medium text-[#8d8d93] transition-colors hover:bg-white/[0.07] hover:text-white";
+  "rounded-xl border border-white/[0.10] bg-white/[0.04] px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.07] hover:text-white";

@@ -7,7 +7,7 @@ type Props = {
 
 export function Card({ children, className }: Props) {
   return (
-    <div className={cn("rounded-sm border border-stroke bg-white shadow-default", className)}>
+    <div className={cn("rounded-xl border border-white/[0.07] bg-[#1a1a1a]", className)}>
       {children}
     </div>
   );
@@ -15,13 +15,13 @@ export function Card({ children, className }: Props) {
 
 export function CardHeader({ children, className }: Props) {
   return (
-    <div className={cn("border-b border-gray-200 px-5 py-4", className)}>{children}</div>
+    <div className={cn("border-b border-white/[0.07] px-5 py-3.5", className)}>{children}</div>
   );
 }
 
 export function CardTitle({ children, className }: Props) {
   return (
-    <h3 className={cn("text-sm font-semibold text-gray-900", className)}>{children}</h3>
+    <h3 className={cn("text-[13px] font-medium text-white/90", className)}>{children}</h3>
   );
 }
 

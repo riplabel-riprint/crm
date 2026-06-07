@@ -41,7 +41,6 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
   const estimatedPrice = calculateEstimatedPrice(config);
   const unitPrice = estimatedPrice / config.quantity;
 
-  // Route to sub-editor when something is selected
   if (selected?.kind === "text") {
     const text = config.textElements.find((el) => el.id === selected.id);
     if (text) return <PrintTextEditor textElement={text} />;
@@ -59,20 +58,13 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
       const src = ev.target?.result as string;
       const img = new window.Image();
       img.onload = () => {
-        // Scale so longest side = 80mm
         const longest = Math.max(img.naturalWidth, img.naturalHeight);
         const ratio = 80 / longest;
-        addImageElement(
-          src,
-          file.name,
-          Math.round(img.naturalWidth * ratio),
-          Math.round(img.naturalHeight * ratio),
-        );
+        addImageElement(src, file.name, Math.round(img.naturalWidth * ratio), Math.round(img.naturalHeight * ratio));
       };
       img.src = src;
     };
     reader.readAsDataURL(file);
-    // Reset so same file can be re-uploaded
     e.target.value = "";
   }
 
@@ -83,13 +75,13 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
         <CardHeader><CardTitle>Podsumowanie</CardTitle></CardHeader>
         <CardBody className="space-y-4">
           <div className="space-y-1">
-            <div className="text-xs text-gray-500 uppercase font-medium tracking-wide">Cena jednostkowa</div>
-            <div className="text-sm font-mono text-gray-900">{unitPrice.toFixed(2)} PLN</div>
+            <div className="text-xs text-white/40 uppercase font-medium tracking-wide">Cena jednostkowa</div>
+            <div className="text-sm font-mono text-white">{unitPrice.toFixed(2)} PLN</div>
           </div>
-          <div className="space-y-1 border-t border-gray-200 pt-4">
-            <div className="text-xs text-gray-500 uppercase font-medium tracking-wide">Szacunkowa cena</div>
-            <div className="text-2xl font-bold text-blue-600">{estimatedPrice.toFixed(2)} PLN</div>
-            <div className="text-xs text-gray-500">
+          <div className="space-y-1 border-t border-white/[0.07] pt-4">
+            <div className="text-xs text-white/40 uppercase font-medium tracking-wide">Szacunkowa cena</div>
+            <div className="text-2xl font-bold text-[#fe4e00]">{estimatedPrice.toFixed(2)} PLN</div>
+            <div className="text-xs text-white/30">
               ({config.quantity.toLocaleString("pl-PL")} × {unitPrice.toFixed(2)} PLN)
             </div>
           </div>
@@ -101,16 +93,16 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
         <CardHeader><CardTitle>Szczegóły</CardTitle></CardHeader>
         <CardBody className="space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-600">Format</span>
-            <span className="font-medium">{config.format.toUpperCase()}</span>
+            <span className="text-white/50">Format</span>
+            <span className="font-medium text-white">{config.format.toUpperCase()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Ilość</span>
-            <span className="font-medium">{config.quantity.toLocaleString("pl-PL")} szt.</span>
+            <span className="text-white/50">Ilość</span>
+            <span className="font-medium text-white">{config.quantity.toLocaleString("pl-PL")} szt.</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Papier</span>
-            <span className="font-medium">
+            <span className="text-white/50">Papier</span>
+            <span className="font-medium text-white">
               {config.paperType === "standard" && "Standardowy"}
               {config.paperType === "glossy" && "Glossy"}
               {config.paperType === "matte" && "Matte"}
@@ -118,8 +110,8 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Druk</span>
-            <span className="font-medium">
+            <span className="text-white/50">Druk</span>
+            <span className="font-medium text-white">
               {config.printType === "color" && "Kolorowy (RGB)"}
               {config.printType === "bw" && "Czarno-białe"}
               {config.printType === "cmyk" && "CMYK"}
@@ -127,8 +119,8 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
           </div>
           {config.bindingType && config.bindingType !== "none" && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Oprawa</span>
-              <span className="font-medium">
+              <span className="text-white/50">Oprawa</span>
+              <span className="font-medium text-white">
                 {config.bindingType === "saddle" && "Zszywka"}
                 {config.bindingType === "perfect" && "Klejona"}
                 {config.bindingType === "comb" && "Spirala"}
@@ -144,10 +136,10 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
           <CardHeader><CardTitle>Obróbka końcowa</CardTitle></CardHeader>
           <CardBody>
             <ul className="space-y-2 text-sm">
-              {config.finishings.lamination && <li className="flex items-center gap-2 text-gray-700"><span className="text-blue-600">✦</span> Laminowanie</li>}
-              {config.finishings.cutting && <li className="flex items-center gap-2 text-gray-700"><span className="text-blue-600">✂</span> Cięcie</li>}
-              {config.finishings.folding && <li className="flex items-center gap-2 text-gray-700"><span className="text-blue-600">📑</span> Składanie</li>}
-              {config.finishings.numbering && <li className="flex items-center gap-2 text-gray-700"><span className="text-blue-600">🔢</span> Numeracja</li>}
+              {config.finishings.lamination && <li className="flex items-center gap-2 text-white/70"><span className="text-[#fe4e00]">✦</span> Laminowanie</li>}
+              {config.finishings.cutting    && <li className="flex items-center gap-2 text-white/70"><span className="text-[#fe4e00]">✂</span> Cięcie</li>}
+              {config.finishings.folding    && <li className="flex items-center gap-2 text-white/70"><span className="text-[#fe4e00]">📑</span> Składanie</li>}
+              {config.finishings.numbering  && <li className="flex items-center gap-2 text-white/70"><span className="text-[#fe4e00]">🔢</span> Numeracja</li>}
             </ul>
           </CardBody>
         </Card>
@@ -158,33 +150,27 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
         <CardHeader><CardTitle>Grafika na nadruku</CardTitle></CardHeader>
         <CardBody className="space-y-3">
           {config.imageElements.length === 0 ? (
-            <p className="text-sm text-gray-500">Brak grafik</p>
+            <p className="text-sm text-white/30">Brak grafik</p>
           ) : (
             <div className="space-y-2">
               {config.imageElements.map((img) => (
                 <button
                   key={img.id}
                   onClick={() => select({ kind: "image", id: img.id })}
-                  className="w-full text-left rounded border border-gray-200 px-3 py-2 text-sm hover:bg-blue-50 transition-colors"
+                  className="w-full text-left rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm hover:bg-white/[0.05] transition-colors"
                 >
-                  <div className="font-medium truncate">{img.name}</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="font-medium text-white truncate">{img.name}</div>
+                  <div className="text-xs text-white/40">
                     {img.width.toFixed(0)}×{img.height.toFixed(0)} mm • {Math.round(img.opacity * 100)}% opacity
                   </div>
                 </button>
               ))}
             </div>
           )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-full rounded-md bg-violet-100 px-4 py-2 text-sm font-medium text-violet-700 hover:bg-violet-200 transition-colors"
+            className="w-full rounded-lg bg-[#fe4e00]/10 px-4 py-2 text-sm font-medium text-[#fe4e00] hover:bg-[#fe4e00]/20 transition-colors"
           >
             + Dodaj grafikę
           </button>
@@ -196,24 +182,24 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
         <CardHeader><CardTitle>Tekst na nadruku</CardTitle></CardHeader>
         <CardBody className="space-y-3">
           {config.textElements.length === 0 ? (
-            <p className="text-sm text-gray-500">Brak elementów tekstowych</p>
+            <p className="text-sm text-white/30">Brak elementów tekstowych</p>
           ) : (
             <div className="space-y-2">
               {config.textElements.map((text) => (
                 <button
                   key={text.id}
                   onClick={() => select({ kind: "text", id: text.id })}
-                  className="w-full text-left rounded border border-gray-200 px-3 py-2 text-sm hover:bg-blue-50 transition-colors"
+                  className="w-full text-left rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm hover:bg-white/[0.05] transition-colors"
                 >
-                  <div className="font-medium truncate">{text.content}</div>
-                  <div className="text-xs text-gray-500">{text.fontSize}pt • {text.color}</div>
+                  <div className="font-medium text-white truncate">{text.content}</div>
+                  <div className="text-xs text-white/40">{text.fontSize}pt • {text.color}</div>
                 </button>
               ))}
             </div>
           )}
           <button
             onClick={() => addTextElement()}
-            className="w-full rounded-md bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+            className="w-full rounded-lg bg-[#fe4e00]/10 px-4 py-2 text-sm font-medium text-[#fe4e00] hover:bg-[#fe4e00]/20 transition-colors"
           >
             + Dodaj tekst
           </button>
@@ -222,22 +208,22 @@ export function PrintPropertiesPanel({ config }: PrintPropertiesPanelProps) {
 
       {/* Actions */}
       <div className="space-y-2">
-        <button className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+        <button className="w-full rounded-lg bg-[#fe4e00] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#e54400] transition-colors">
           Dodaj do zlecenia
         </button>
-        <button className="w-full rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 transition-colors">
+        <button className="w-full rounded-lg border border-white/[0.1] px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/[0.04] transition-colors">
           Pobierz wycenę PDF
         </button>
         <button
           onClick={() => reset()}
-          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="w-full rounded-lg border border-white/[0.06] px-4 py-2 text-sm font-medium text-white/40 hover:bg-white/[0.04] hover:text-white/60 transition-colors"
         >
           Zresetuj opcje
         </button>
       </div>
 
-      <Card className="bg-blue-50 border-blue-200">
-        <CardBody className="text-xs text-blue-900">
+      <Card className="border-[#fe4e00]/20 bg-[#fe4e00]/5">
+        <CardBody className="text-xs text-white/60">
           <p className="font-medium mb-1">💡 Wskazówka</p>
           <p>Ceny są szacunkowe. Kliknij element na podglądzie, by go edytować.</p>
         </CardBody>

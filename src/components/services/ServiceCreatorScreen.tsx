@@ -223,6 +223,7 @@ export function ServiceCreatorScreen() {
     const serviceId = `service-${uid()}`;
     const price = parseFloat(info.basePricePLN);
 
+    const estimatedDaysNum = parseInt(info.estimatedDays);
     const service: Service = {
       id: serviceId,
       name: info.name.trim(),
@@ -231,7 +232,9 @@ export function ServiceCreatorScreen() {
       pricingModel: info.pricingModel,
       basePrice: { amount: Math.round(price * 100), currency: "PLN" },
       unit: info.unit.trim() || undefined,
+      estimatedDays: !isNaN(estimatedDaysNum) && estimatedDaysNum > 0 ? estimatedDaysNum : undefined,
       isActive: info.isActive,
+      productIds: [],
       createdAt: now,
       updatedAt: now,
     };

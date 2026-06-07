@@ -12,32 +12,27 @@ import { SEED_CLIENTS } from "@/lib/data/clients-seed";
 import type { Client, Order, OrderJobSpec, OrderRevision, OrderStage, OrderEvent, TaskStatus } from "@/types";
 import type { OrderView, ViewClient, ViewOrderStage, ViewOrderTask } from "@/types/order-view";
 
+export type SpecSnapshot = {
+  serviceId: string;
+  variantId?: string;
+  specOptions: Record<string, string>;
+  inputOptions: { widthCm?: number; heightCm?: number; quantity?: number };
+  /** productId → qty (from selectedProducts at order creation) */
+  productQuantities?: Record<string, number>;
+  productAttributeValues?: Record<string, Record<string, string | number | boolean | string[]>>;
+};
+
 export type OrderDetail = Order & {
   client: Client;
   activeRevision: OrderRevision;
   jobSpec?: OrderJobSpec;
+  specSnapshot?: SpecSnapshot;
   stages: OrderStage[];
   events: OrderEvent[];
 };
 
-export async function getOrderDetail(id: string): Promise<OrderDetail | null> {
-  // Try rich mock data first
-  const mockOrder = getMockOrderById(id);
-  if (mockOrder) {
-    const client = (mockOrder as any).client ?? null;
-    if (!client) return null;
-    return {
-      ...mockOrder,
-      client,
-      jobSpec: mockOrder.jobSpec,
-      events: [...mockOrder.events].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ),
-    };
-  }
-
-  // Fallback: crm-seed orders (o-001 … o-010)
-  return getCrmSeedOrderById(id);
+export async function getOrderDetail(_id: string): Promise<OrderDetail | null> {
+  return null;
 }
 
 const CRM_STATUS_MAP: Record<string, Order["status"]> = {
@@ -147,6 +142,7 @@ const clientStatusMap: Record<string, ViewClient["status"]> = {
 
 function mapClient(c: Client): ViewClient {
   return {
+    id: c.id,
     name: c.displayName,
     companyName: c.companyName,
     taxId: c.taxId,
@@ -197,6 +193,9 @@ export function toOrderView(detail: OrderDetail): OrderView {
     number: detail.orderNumber,
     title: detail.title,
     description: detail.description,
+    productId: detail.productId,
+    status: detail.status,
+    priority: detail.priority,
     client: mapClient(detail.client),
     clientDeadline: detail.requestedDeadline ?? null,
     plannedDeadline: detail.estimatedDeadline ?? null,

@@ -15,7 +15,7 @@ export function DashboardClientWrapper() {
     clientId: o.clientId ?? "",
     title: o.title,
     status: mapStatus(o.status),
-    netAmount: o.activeRevision?.total?.amount ?? 0,
+    netAmount: (o.activeRevision?.subtotal?.amount ?? 0) / 100,
     vatRate: 23,
     clientDeadline: o.requestedDeadline ?? null,
     createdAt: o.createdAt,

@@ -9,6 +9,7 @@ export function TodoSection() {
   return (
     <TodoDashboard
       tasks={store.tasks}
+      categories={store.categories}
       addTask={store.addTask}
       toggleTask={store.toggleTask}
       deleteTask={store.deleteTask}
@@ -16,6 +17,9 @@ export function TodoSection() {
       toggleChecklist={store.toggleChecklist}
       addChecklist={store.addChecklist}
       deleteChecklist={store.deleteChecklist}
+      addCategory={store.addCategory}
+      updateCategory={store.updateCategory}
+      deleteCategory={store.deleteCategory}
     />
   );
 }

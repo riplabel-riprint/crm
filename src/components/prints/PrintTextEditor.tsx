@@ -34,54 +34,40 @@ export function PrintTextEditor({ textElement }: PrintTextEditorProps) {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+      <div className="flex items-center justify-between pb-4 border-b border-white/[0.07]">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-gray-900">Edycja tekstu</h3>
+          <h3 className="font-semibold text-white">Edycja tekstu</h3>
           {oob && (
-            <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-700">
+            <span className="rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-orange-400">
               ⚠ poza obszarem
             </span>
           )}
         </div>
-        <button onClick={() => select(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+        <button onClick={() => select(null)} className="text-white/40 hover:text-white transition-colors">✕</button>
       </div>
 
-      {/* Content */}
       <Card>
-        <CardHeader>
-          <CardTitle>Treść</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Treść</CardTitle></CardHeader>
         <CardBody>
           <textarea
             value={textElement.content}
-            onChange={(e) =>
-              updateTextElement(textElement.id, { content: e.target.value })
-            }
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            onChange={(e) => updateTextElement(textElement.id, { content: e.target.value })}
+            className="w-full rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#fe4e00]/60 focus:ring-1 focus:ring-[#fe4e00]/40 placeholder:text-white/20"
             rows={3}
             placeholder="Wprowadź tekst..."
           />
         </CardBody>
       </Card>
 
-      {/* Formatting */}
       <Card>
-        <CardHeader>
-          <CardTitle>Formatowanie</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Formatowanie</CardTitle></CardHeader>
         <CardBody className="space-y-4">
-          {/* Font Family */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Czcionka
-            </label>
+            <label className="block text-sm font-medium text-white/70 mb-1">Czcionka</label>
             <select
               value={textElement.fontFamily}
-              onChange={(e) =>
-                updateTextElement(textElement.id, { fontFamily: e.target.value })
-              }
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              onChange={(e) => updateTextElement(textElement.id, { fontFamily: e.target.value })}
+              className="w-full rounded-lg border border-white/[0.1] bg-[#1a1a1a] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#fe4e00]/60"
             >
               <option value="Arial">Arial</option>
               <option value="Helvetica">Helvetica</option>
@@ -92,46 +78,32 @@ export function PrintTextEditor({ textElement }: PrintTextEditorProps) {
             </select>
           </div>
 
-          {/* Font Size */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-white/70 mb-1">
               Rozmiar: {textElement.fontSize}pt
             </label>
             <input
-              type="range"
-              min="8"
-              max="120"
+              type="range" min="8" max="120"
               value={textElement.fontSize}
-              onChange={(e) =>
-                updateTextElement(textElement.id, {
-                  fontSize: parseInt(e.target.value),
-                })
-              }
-              className="w-full"
+              onChange={(e) => updateTextElement(textElement.id, { fontSize: parseInt(e.target.value) })}
+              className="w-full accent-[#fe4e00]"
             />
           </div>
 
-          {/* Color */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Kolor
-            </label>
+            <label className="block text-sm font-medium text-white/70 mb-1">Kolor</label>
             <div className="flex gap-2 items-center">
               <input
                 type="color"
                 value={textElement.color}
-                onChange={(e) =>
-                  updateTextElement(textElement.id, { color: e.target.value })
-                }
-                className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
+                onChange={(e) => updateTextElement(textElement.id, { color: e.target.value })}
+                className="w-12 h-10 rounded-lg border border-white/[0.1] cursor-pointer bg-transparent"
               />
               <input
                 type="text"
                 value={textElement.color}
-                onChange={(e) =>
-                  updateTextElement(textElement.id, { color: e.target.value })
-                }
-                className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-500"
+                onChange={(e) => updateTextElement(textElement.id, { color: e.target.value })}
+                className="flex-1 rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-[#fe4e00]/60"
                 placeholder="#000000"
               />
             </div>
@@ -139,112 +111,31 @@ export function PrintTextEditor({ textElement }: PrintTextEditorProps) {
         </CardBody>
       </Card>
 
-      {/* Position & Transform */}
       <Card>
-        <CardHeader>
-          <CardTitle>Pozycja i transformacja</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Pozycja i transformacja</CardTitle></CardHeader>
         <CardBody className="space-y-4">
-          {/* X Position */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Pozycja X: {textElement.x.toFixed(1)}mm
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="210"
-              step="0.5"
-              value={textElement.x}
-              onChange={(e) => moveX(parseFloat(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* Y Position */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Pozycja Y: {textElement.y.toFixed(1)}mm
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="297"
-              step="0.5"
-              value={textElement.y}
-              onChange={(e) => moveY(parseFloat(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* Rotation */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Obrót: {textElement.rotation}°
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="360"
-              value={textElement.rotation}
-              onChange={(e) =>
-                updateTextElement(textElement.id, {
-                  rotation: parseInt(e.target.value),
-                })
-              }
-              className="w-full"
-            />
-          </div>
-
-          {/* Scale X */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Skalowanie poziome: {textElement.scaleX.toFixed(2)}x
-            </label>
-            <input
-              type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={textElement.scaleX}
-              onChange={(e) =>
-                updateTextElement(textElement.id, {
-                  scaleX: parseFloat(e.target.value),
-                })
-              }
-              className="w-full"
-            />
-          </div>
-
-          {/* Scale Y */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Skalowanie pionowe: {textElement.scaleY.toFixed(2)}x
-            </label>
-            <input
-              type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={textElement.scaleY}
-              onChange={(e) =>
-                updateTextElement(textElement.id, {
-                  scaleY: parseFloat(e.target.value),
-                })
-              }
-              className="w-full"
-            />
-          </div>
+          {[
+            { label: `Pozycja X: ${textElement.x.toFixed(1)}mm`, min: 0, max: 210, step: 0.5, value: textElement.x, onChange: (v: number) => moveX(v) },
+            { label: `Pozycja Y: ${textElement.y.toFixed(1)}mm`, min: 0, max: 297, step: 0.5, value: textElement.y, onChange: (v: number) => moveY(v) },
+            { label: `Obrót: ${textElement.rotation}°`, min: 0, max: 360, step: 1, value: textElement.rotation, onChange: (v: number) => updateTextElement(textElement.id, { rotation: v }) },
+            { label: `Skalowanie poziome: ${textElement.scaleX.toFixed(2)}x`, min: 0.5, max: 2, step: 0.1, value: textElement.scaleX, onChange: (v: number) => updateTextElement(textElement.id, { scaleX: v }) },
+            { label: `Skalowanie pionowe: ${textElement.scaleY.toFixed(2)}x`, min: 0.5, max: 2, step: 0.1, value: textElement.scaleY, onChange: (v: number) => updateTextElement(textElement.id, { scaleY: v }) },
+          ].map(({ label, min, max, step, value, onChange }) => (
+            <div key={label}>
+              <label className="block text-sm font-medium text-white/70 mb-1">{label}</label>
+              <input
+                type="range" min={min} max={max} step={step} value={value}
+                onChange={(e) => onChange(parseFloat(e.target.value))}
+                className="w-full accent-[#fe4e00]"
+              />
+            </div>
+          ))}
         </CardBody>
       </Card>
 
-      {/* Delete Button */}
       <button
-        onClick={() => {
-          deleteTextElement(textElement.id);
-          select(null);
-        }}
-        className="w-full rounded-md bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
+        onClick={() => { deleteTextElement(textElement.id); select(null); }}
+        className="w-full rounded-lg bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
       >
         🗑 Usuń tekst
       </button>

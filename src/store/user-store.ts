@@ -10,6 +10,7 @@ type UserState = {
   login: (user: AppUser) => void;
   logout: () => void;
   setRole: (role: UserRole) => void;
+  updateProfile: (patch: Partial<AppUser>) => void;
 };
 
 export const useUserStore = create<UserState>()(
@@ -22,6 +23,10 @@ export const useUserStore = create<UserState>()(
       setRole: (role) =>
         set((s) =>
           s.currentUser ? { currentUser: { ...s.currentUser, role } } : {}
+        ),
+      updateProfile: (patch) =>
+        set((s) =>
+          s.currentUser ? { currentUser: { ...s.currentUser, ...patch } } : {}
         ),
     }),
     { name: "riprint-user-store" }

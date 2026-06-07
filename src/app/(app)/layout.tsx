@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { useUserStore } from "@/store/user-store";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -26,12 +27,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#0d0d0d]">
+    <div className="flex h-screen overflow-hidden bg-[var(--background)]">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }

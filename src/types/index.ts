@@ -63,7 +63,9 @@ export type Service = {
   basePrice: Money;
   unit?: string; // "szt.", "m²", "str."
   description?: string;
+  estimatedDays?: number;
   isActive: boolean;
+  productIds: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
@@ -75,6 +77,7 @@ export type Product = {
   serviceId: ID;
   name: string;
   description?: string;
+  price?: Money;
   isActive: boolean;
 };
 
@@ -147,6 +150,8 @@ export type OrderStatus =
 
 export type OrderPriority = "low" | "normal" | "high" | "urgent";
 
+export type PaymentMethod = "transfer" | "gotowka" | "cash";
+
 export type Order = {
   id: ID;
   orderNumber: string; // e.g. "RIP-2026-0042"
@@ -166,9 +171,15 @@ export type Order = {
   estimatedDeadline?: Timestamp;
   completedAt?: Timestamp;
 
+  // product selected during order creation
+  productId?: ID;
+
   // workflow
   workflowId?: ID;
   currentStageId?: ID;
+
+  // payment
+  paymentMethod?: PaymentMethod;
 
   // meta
   tags: string[];
@@ -377,6 +388,7 @@ export type OrderServiceConfiguration = {
 export type OrderEventType =
   | "order_created"
   | "order_status_changed"
+  | "priority_changed"
   | "revision_created"
   | "revision_accepted"
   | "revision_rejected"
@@ -386,7 +398,9 @@ export type OrderEventType =
   | "comment_added"
   | "file_uploaded"
   | "deadline_changed"
-  | "assigned_changed";
+  | "assigned_changed"
+  | "client_changed"
+  | "pricing_updated";
 
 export type OrderEvent = {
   id: ID;

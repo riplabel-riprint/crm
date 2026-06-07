@@ -12,7 +12,7 @@ const ROLE_ENTITY_MAP: Record<UserRole, NotificationEntityType[]> = {
 
 export function useNotifications() {
   const { currentUser } = useUserStore();
-  const { notifications, init, markAsRead, markAllAsRead } = useNotificationsStore();
+  const { notifications, init, addNotification, markAsRead, markAllAsRead, removeNotification } = useNotificationsStore();
 
   const allowed = currentUser ? ROLE_ENTITY_MAP[currentUser.role] : [];
   const filtered = currentUser
@@ -28,7 +28,9 @@ export function useNotifications() {
     unreadCount,
     currentUser,
     init: () => { if (currentUser) init(currentUser.id); },
+    addNotification: (n: Parameters<typeof addNotification>[0]) => addNotification(n),
     markAsRead,
     markAllAsRead,
+    removeNotification,
   };
 }

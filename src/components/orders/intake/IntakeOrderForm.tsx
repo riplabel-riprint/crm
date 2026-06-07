@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,8 @@ import {
 import { createOrder } from "@/lib/business/create-order";
 import { useOrdersStore } from "@/store/orders-store";
 import { useClientsStore } from "@/store/clients-store";
+import { useNotificationsStore } from "@/store/notifications-store";
+import { useUserStore } from "@/store/user-store";
 import { formatMoney } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -72,6 +74,8 @@ export function IntakeOrderForm({ services, onCreated }: Props) {
   const router = useRouter();
   const { addOrder, nextSequence } = useOrdersStore();
   const { clients: allClients, addClient: addCrmClient } = useClientsStore();
+  const addNotification = useNotificationsStore((s) => s.addNotification);
+  const currentUser = useUserStore((s) => s.currentUser);
 
   const [state, setState] = useState<OrderFormState>(INITIAL_FORM_STATE);
   const [clientMode, setClientMode] = useState<ClientMode>("existing");
@@ -209,7 +213,21 @@ export function IntakeOrderForm({ services, onCreated }: Props) {
 
       result.client = resolvedClient ?? result.client;
       addOrder(result);
-
+      if (currentUser) {
+        addNotification({
+          id: `order-created-${result.id}`,
+          userId: currentUser.id,
+          title: "Nowe zlecenie utworzone",
+          message: `${result.orderNumber} — ${result.title}`,
+          type: "success",
+          priority: "low",
+          read: false,
+          createdAt: new Date().toISOString(),
+          relatedEntityType: "order",
+          relatedEntityId: result.id,
+          actionUrl: `/orders/${result.id}`,
+        });
+      }
       if (onCreated) onCreated();
       router.push(`/orders/${result.id}`);
     } finally {

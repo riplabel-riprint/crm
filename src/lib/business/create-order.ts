@@ -25,9 +25,10 @@ import type {
   OrderEvent,
   OrderPriority,
   Money,
+  ServiceStage,
 } from "@/types";
-import type { OrderDetail } from "@/lib/data/orders";
-import { DEFAULT_WORKFLOW } from "@/lib/workflows/default";
+import type { OrderDetail, SpecSnapshot } from "@/lib/data/orders";
+import { getWorkflowForCategory } from "@/lib/workflows/category-workflows";
 
 // ─── Input types ─────────────────────────────────────────────────────────────
 
@@ -41,6 +42,7 @@ export type CreateOrderItemInput = {
 
 export type CreateOrderInput = {
   clientId: string;
+  productId?: string;
   title: string;
   description?: string;
   priority: OrderPriority;
@@ -56,6 +58,15 @@ export type CreateOrderInput = {
 
   // Sequential counter — in real app comes from DB sequence
   sequenceNumber: number;
+
+  // Category of the primary service — used to select the right workflow (fallback)
+  serviceCategory?: string;
+
+  // Stages from the service configuration — takes priority over category workflow
+  serviceStages?: ServiceStage[];
+
+  // Structured spec from Step 2 — stored for display/editing in workflow panel
+  specSnapshot?: SpecSnapshot;
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -115,34 +126,54 @@ export function createOrder(input: CreateOrderInput): OrderDetail {
     updatedAt: ts,
   };
 
-  // ── 2. Instantiate stages + tasks from workflow ───────────────────────────
-  const workflow = DEFAULT_WORKFLOW;
-
-  const stages: OrderStage[] = workflow.stages.map((stageTemplate, idx) => {
-    const stageId = uid();
-    const isFirst = idx === 0;
-
-    const tasks: OrderStageTask[] = stageTemplate.taskTemplates.map((tmpl) => ({
-      id: uid(),
-      stageId,
-      workflowTaskTemplateId: tmpl.id,
-      name: tmpl.name,
-      position: tmpl.position,
-      status: "pending" as const,
-      isRequired: tmpl.isRequired,
-    }));
-
-    return {
-      id: stageId,
-      orderId,
-      workflowStageTemplateId: stageTemplate.id,
-      name: stageTemplate.name,
-      position: stageTemplate.position,
-      status: isFirst ? "active" : ("pending" as const),
-      startedAt: isFirst ? ts : undefined,
-      tasks,
-    };
-  });
+  // ── 2. Instantiate stages + tasks ────────────────────────────────────────
+  const workflow = getWorkflowForCategory(input.serviceCategory ?? "");
+  const stages: OrderStage[] = (() => {
+    if (input.serviceStages && input.serviceStages.length > 0) {
+      return input.serviceStages.map((ss, idx) => {
+        const stageId = uid();
+        const tasks: OrderStageTask[] = ss.tasks.map((t, tIdx) => ({
+          id: uid(),
+          stageId,
+          name: t.name,
+          position: tIdx + 1,
+          status: (t.defaultStatus === "done" ? "done" : "pending") as "done" | "pending",
+          isRequired: t.required,
+        }));
+        return {
+          id: stageId,
+          orderId,
+          name: ss.name,
+          position: ss.position,
+          status: idx === 0 ? ("active" as const) : ("pending" as const),
+          startedAt: idx === 0 ? ts : undefined,
+          tasks,
+        };
+      });
+    }
+    return workflow.stages.map((stageTemplate, idx) => {
+      const stageId = uid();
+      const tasks: OrderStageTask[] = stageTemplate.taskTemplates.map((tmpl) => ({
+        id: uid(),
+        stageId,
+        workflowTaskTemplateId: tmpl.id,
+        name: tmpl.name,
+        position: tmpl.position,
+        status: "pending" as const,
+        isRequired: tmpl.isRequired,
+      }));
+      return {
+        id: stageId,
+        orderId,
+        workflowStageTemplateId: stageTemplate.id,
+        name: stageTemplate.name,
+        position: stageTemplate.position,
+        status: idx === 0 ? ("active" as const) : ("pending" as const),
+        startedAt: idx === 0 ? ts : undefined,
+        tasks,
+      };
+    });
+  })();
 
   const firstStage = stages[0];
 
@@ -151,6 +182,7 @@ export function createOrder(input: CreateOrderInput): OrderDetail {
     id: orderId,
     orderNumber: buildOrderNumber(year, input.sequenceNumber),
     clientId: input.clientId,
+    productId: input.productId || undefined,
     status: "draft",
     priority: input.priority,
     title: input.title,
@@ -214,6 +246,7 @@ export function createOrder(input: CreateOrderInput): OrderDetail {
     ...order,
     client: { id: input.clientId } as OrderDetail["client"], // shell — store fills from client list
     activeRevision: revision,
+    specSnapshot: input.specSnapshot,
     stages,
     events: [...events].reverse(), // newest first for EventLog
   };

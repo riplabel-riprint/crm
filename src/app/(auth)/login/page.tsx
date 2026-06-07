@@ -4,14 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useUserStore } from "@/store/user-store";
+import { SplashScreen } from "@/components/auth/SplashScreen";
 
 // ─── Stat pill ────────────────────────────────────────────────────────────────
 
 function StatPill({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex flex-col items-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-sm">
-      <span className="text-xl font-bold text-white">{value}</span>
-      <span className="mt-0.5 text-[11px] font-medium text-white/50 uppercase tracking-wide">{label}</span>
+      <span className="text-xl font-extrabold text-white" style={{ letterSpacing: "-0.02em" }}>{value}</span>
+      <span className="mt-0.5 text-[10px] font-semibold text-white/45 uppercase tracking-widest">{label}</span>
     </div>
   );
 }
@@ -25,8 +26,8 @@ function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; 
         {icon}
       </div>
       <div>
-        <p className="text-sm font-semibold text-white/90">{title}</p>
-        <p className="text-xs text-white/45 mt-0.5 leading-relaxed">{desc}</p>
+        <p className="text-sm font-semibold text-white/90" style={{ letterSpacing: "0.01em" }}>{title}</p>
+        <p className="text-xs font-light text-white/45 mt-0.5 leading-relaxed">{desc}</p>
       </div>
     </div>
   );
@@ -79,6 +80,7 @@ export default function LoginPage() {
   const [emailFocus,  setEmailFocus]  = useState(false);
   const [passFocus,   setPassFocus]   = useState(false);
 
+  const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
   const login = useUserStore((s) => s.login);
 
@@ -97,7 +99,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white" style={{ fontFamily: "var(--font-montserrat), sans-serif" }}>
+    {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
 
       {/* ── Left: branding panel ─────────────────────────────────── */}
       <div className="relative hidden lg:flex lg:w-[52%] xl:w-[55%] flex-col overflow-hidden bg-[#1C2434]">
@@ -119,15 +122,12 @@ export default function LoginPage() {
 
         {/* Top logo bar */}
         <div className="relative flex items-center gap-3 px-10 pt-10">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#3C50E0]">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
-            </svg>
-          </div>
-          <span className="text-xl font-bold tracking-tight text-white">
-            Ri<span className="text-[#3C50E0]">print</span>
-          </span>
-          <span className="ml-1 rounded bg-[#3C50E0]/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[#3C50E0]">
+          <img
+            src="https://projektowanieprzemysl.pl/wp-content/uploads/2025/12/Projekt-bez-nazwy-3.png.webp"
+            alt="Projektowanie Przemyśl"
+            className="h-9 w-auto object-contain"
+          />
+          <span className="ml-1 rounded bg-[#3C50E0]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[#3C50E0]">
             Panel
           </span>
         </div>
@@ -138,15 +138,15 @@ export default function LoginPage() {
             {/* Tag */}
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#3C50E0]/30 bg-[#3C50E0]/10 px-3.5 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-[#3C50E0] animate-pulse" />
-              <span className="text-xs font-semibold tracking-wide text-[#7B8FF7]">Panel operacyjny drukarni</span>
+              <span className="text-xs font-medium tracking-widest text-[#7B8FF7] uppercase">Panel operacyjny drukarni</span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white">
+            <h1 className="text-4xl font-black leading-tight tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
               Zarządzaj zleceniami<br />
               <span className="text-[#3C50E0]">szybciej</span> i mądrzej.
             </h1>
-            <p className="mt-4 text-base text-white/50 leading-relaxed">
+            <p className="mt-4 text-base font-light text-white/50 leading-relaxed">
               Riprint to kompleksowy system dla drukarni cyfrowych — od wyceny po dostawę. Wszystko w jednym miejscu.
             </p>
 
@@ -185,10 +185,10 @@ export default function LoginPage() {
               MK
             </div>
             <div>
-              <p className="text-sm text-white/70 leading-relaxed">
+              <p className="text-sm font-light text-white/70 leading-relaxed">
                 &ldquo;Od kiedy używamy Riprint, czas obsługi zlecenia skrócił się o 40%.&rdquo;
               </p>
-              <p className="mt-1.5 text-xs font-semibold text-white/35">
+              <p className="mt-1.5 text-xs font-medium text-white/35 tracking-wide">
                 Marta Kowalska — Kierownik produkcji, PrintHouse Wrocław
               </p>
             </div>
@@ -197,24 +197,46 @@ export default function LoginPage() {
       </div>
 
       {/* ── Right: login card ────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-[#F1F5F9] px-6 py-12">
+      <div className="relative flex flex-1 flex-col items-center justify-center bg-black px-6 py-12 overflow-hidden">
+
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage:
+              "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+
+        {/* Orange radial glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 75% 55% at 50% 50%, rgba(251,113,28,0.22) 0%, rgba(234,88,12,0.10) 45%, transparent 70%)",
+          }}
+        />
 
         {/* Mobile logo */}
-        <div className="mb-8 flex items-center gap-2 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1C2434]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          </div>
-          <span className="text-lg font-bold text-gray-900">Ri<span className="text-[#3C50E0]">print</span></span>
+        <div className="relative mb-8 flex flex-col items-center gap-3 lg:hidden">
+          <img
+            src="https://projektowanieprzemysl.pl/wp-content/uploads/2025/12/Projekt-bez-nazwy-3.png.webp"
+            alt="Projektowanie Przemyśl"
+            style={{ height: "48px", width: "auto", objectFit: "contain", filter: "brightness(1.1)" }}
+          />
+          <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.2em", color: "rgba(255,255,255,0.35)", textTransform: "uppercase" }}>
+            Panel operacyjny
+          </span>
         </div>
 
         {/* Card */}
-        <div className="w-full max-w-[400px]">
+        <div className="relative w-full max-w-[400px]">
           <div className="rounded-2xl border border-gray-200/80 bg-white px-8 py-9 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)]">
 
             {/* Card header */}
             <div className="mb-7">
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900">Zaloguj się</h2>
-              <p className="mt-1.5 text-sm text-gray-500">
+              <h2 className="text-2xl font-extrabold text-gray-900" style={{ letterSpacing: "-0.02em" }}>Zaloguj się</h2>
+              <p className="mt-1.5 text-sm font-light text-gray-500">
                 Witaj z powrotem — wprowadź dane konta.
               </p>
             </div>
@@ -222,7 +244,7 @@ export default function LoginPage() {
             {/* Google SSO */}
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.99]"
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.99]"
             >
               {IconGoogle}
               Kontynuuj przez Google
@@ -231,7 +253,7 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="my-5 flex items-center gap-3">
               <div className="h-px flex-1 bg-gray-100" />
-              <span className="text-xs font-medium text-gray-400">lub e-mail</span>
+              <span className="text-xs font-semibold text-gray-400 tracking-widest uppercase">lub e-mail</span>
               <div className="h-px flex-1 bg-gray-100" />
             </div>
 
@@ -240,7 +262,7 @@ export default function LoginPage() {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">
                   Adres e-mail
                 </label>
                 <div className={`flex items-center rounded-xl border bg-white transition-all ${
@@ -269,12 +291,12 @@ export default function LoginPage() {
               {/* Password */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
                     Hasło
                   </label>
                   <Link
                     href="#"
-                    className="text-xs font-medium text-[#3C50E0] hover:text-[#3346C8] hover:underline transition-colors"
+                    className="text-xs font-semibold text-[#3C50E0] hover:text-[#3346C8] hover:underline transition-colors"
                   >
                     Nie pamiętam hasła
                   </Link>
@@ -330,7 +352,7 @@ export default function LoginPage() {
                     </svg>
                   )}
                 </button>
-                <span className="text-sm text-gray-600 select-none cursor-pointer" onClick={() => setRemember(!remember)}>
+                <span className="text-sm font-medium text-gray-600 select-none cursor-pointer" onClick={() => setRemember(!remember)}>
                   Zapamiętaj mnie na tym urządzeniu
                 </span>
               </div>
@@ -339,7 +361,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="relative mt-1 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#1C2434] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#252f41] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
+                className="relative mt-1 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#1C2434] px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-[#252f41] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed" style={{ letterSpacing: "0.04em" }}
               >
                 {loading ? (
                   <>

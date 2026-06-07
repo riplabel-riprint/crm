@@ -2,6 +2,8 @@ import { getOrderDetail, toOrderView } from "@/lib/data/orders";
 import { OrderDetailView } from "@/components/orders/OrderDetailView";
 import { OrderDetailStoreSync } from "@/components/orders/OrderDetailStoreSync";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ id: string }> };
 
 export default async function OrderDetailPage({ params }: Props) {

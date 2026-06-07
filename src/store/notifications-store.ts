@@ -10,8 +10,10 @@ type NotificationsState = {
   notifications: Notification[];
 
   init: (userId: string) => void;
+  addNotification: (n: Notification) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
+  removeNotification: (id: string) => void;
 };
 
 export const useNotificationsStore = create<NotificationsState>()(
@@ -29,6 +31,13 @@ export const useNotificationsStore = create<NotificationsState>()(
         set({ notifications: fresh });
       },
 
+      addNotification: (n) => {
+        set((s) => {
+          if (s.notifications.some((x) => x.id === n.id)) return {};
+          return { notifications: [n, ...s.notifications] };
+        });
+      },
+
       markAsRead: (id: string) => {
         set((s) => ({
           _readIds: s._readIds.includes(id) ? s._readIds : [...s._readIds, id],
@@ -42,6 +51,13 @@ export const useNotificationsStore = create<NotificationsState>()(
         set((s) => ({
           _readIds: [...new Set([...s._readIds, ...s.notifications.map((n) => n.id)])],
           notifications: s.notifications.map((n) => ({ ...n, read: true })),
+        }));
+      },
+
+      removeNotification: (id: string) => {
+        set((s) => ({
+          notifications: s.notifications.filter((n) => n.id !== id),
+          _readIds: s._readIds.filter((rid) => rid !== id),
         }));
       },
     }),

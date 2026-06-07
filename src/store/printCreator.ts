@@ -3,6 +3,14 @@ import { create } from "zustand";
 export type PrintFormat = "a4" | "a3" | "a2" | "custom";
 export type PrintType = "color" | "bw" | "cmyk";
 export type PaperType = "standard" | "glossy" | "matte" | "coated";
+export type PrintCategory =
+  | "large_format"
+  | "digital"
+  | "offset"
+  | "gadgets"
+  | "labels"
+  | "finishing"
+  | "";
 
 export interface TextElement {
   id: string;
@@ -43,6 +51,7 @@ export interface PrintConfiguration {
   width?: number;
   height?: number;
   quantity: number;
+  printCategory: PrintCategory;
   printType: PrintType;
   paperType: PaperType;
   bindingType?: "none" | "saddle" | "perfect" | "comb";
@@ -84,6 +93,7 @@ interface PrintCreatorStore {
 const defaultConfig: PrintConfiguration = {
   format: "a4",
   quantity: 100,
+  printCategory: "",
   printType: "color",
   paperType: "standard",
   bindingType: "none",

@@ -30,12 +30,11 @@ export function PrintAreaPanel() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Obszar druku</CardTitle>
-          {/* enable toggle */}
           <button
             onClick={() => update({ enabled: !area.enabled })}
             className={cn(
               "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-              area.enabled ? "bg-blue-600" : "bg-gray-300",
+              area.enabled ? "bg-[#fe4e00]" : "bg-white/[0.15]",
             )}
           >
             <span
@@ -52,7 +51,7 @@ export function PrintAreaPanel() {
         <CardBody className="space-y-5">
           {/* Warn / Lock mode */}
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            <p className="text-xs font-medium text-white/40 uppercase tracking-wide mb-2">
               Tryb naruszenia
             </p>
             <div className="flex gap-2">
@@ -61,17 +60,17 @@ export function PrintAreaPanel() {
                   key={mode}
                   onClick={() => update({ mode })}
                   className={cn(
-                    "flex-1 rounded border px-3 py-1.5 text-xs font-medium transition-colors",
+                    "flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
                     area.mode === mode
-                      ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-50",
+                      ? "border-[#fe4e00]/50 bg-[#fe4e00]/10 text-[#fe4e00]"
+                      : "border-white/[0.1] text-white/50 hover:bg-white/[0.04]",
                   )}
                 >
                   {mode === "warn" ? "⚠ Ostrzeżenie" : "🔒 Blokada"}
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-white/30">
               {area.mode === "warn"
                 ? "Elementy poza obszarem są oznaczane ostrzeżeniem."
                 : "Elementy nie mogą wychodzić poza obszar bezpieczny."}
@@ -80,12 +79,12 @@ export function PrintAreaPanel() {
 
           {/* Symmetric toggle */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-700">Jednakowe marginesy</span>
+            <span className="text-sm text-white/70">Jednakowe marginesy</span>
             <button
               onClick={() => setSymmetric((v) => !v)}
               className={cn(
                 "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-                symmetric ? "bg-blue-600" : "bg-gray-300",
+                symmetric ? "bg-[#fe4e00]" : "bg-white/[0.15]",
               )}
             >
               <span
@@ -101,7 +100,7 @@ export function PrintAreaPanel() {
           <div className="space-y-3">
             {(symmetric ? [margins[0]] : margins).map(({ key, label }) => (
               <div key={key}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-1">
                   {symmetric ? "Margines" : label}: {area[key]} mm
                 </label>
                 <input
@@ -111,13 +110,13 @@ export function PrintAreaPanel() {
                   step="1"
                   value={area[key]}
                   onChange={(e) => setMargin(key, parseInt(e.target.value))}
-                  className="w-full"
+                  className="w-full accent-[#fe4e00]"
                 />
               </div>
             ))}
 
             {!symmetric && (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500 border border-gray-200 rounded p-2">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-white/40 border border-white/[0.07] rounded-lg p-2">
                 <span>↑ Góra: {area.marginTop} mm</span>
                 <span>→ Prawo: {area.marginRight} mm</span>
                 <span>↓ Dół: {area.marginBottom} mm</span>

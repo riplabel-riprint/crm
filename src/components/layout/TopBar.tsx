@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, RefreshCw, Moon, Sun, LogOut } from "lucide-react";
+import { Moon, Sun, LogOut } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { MobileMenuButton, MobileDrawer } from "./MobileNav";
+import { SearchPopup } from "./SearchPopup";
 import { useTheme } from "@/hooks/useTheme";
 import { useUserStore } from "@/store/user-store";
 
@@ -49,29 +50,38 @@ export function TopBar() {
   return (
     <>
       <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)} />
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0d0d0d] px-7 z-10">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--surface)] px-4 md:px-7 z-10">
         <div className="flex items-center">
           <MobileMenuButton onClick={() => setMobileOpen(true)} />
-          <h1 style={{ fontSize: "18px", fontWeight: 400, color: "#ffffff" }}>{label}</h1>
+          <h1 style={{ fontSize: "18px", fontWeight: 400, color: "var(--text-primary)" }}>{label}</h1>
         </div>
-      <div className="flex items-center gap-4 text-white/60">
-        <Search size={17} className="cursor-pointer hover:text-white transition-colors" />
-        <RefreshCw size={17} className="cursor-pointer hover:text-white transition-colors" />
+      <div className="flex items-center gap-4 text-[var(--text-muted)]">
+        <SearchPopup />
         <NotificationBell />
         {dark
-          ? <Moon size={17} className="cursor-pointer hover:text-white transition-colors" onClick={toggle} />
-          : <Sun  size={17} className="cursor-pointer hover:text-white transition-colors" onClick={toggle} />
+          ? <Moon size={17} className="cursor-pointer hover:text-[var(--text-primary)] transition-colors" onClick={toggle} />
+          : <Sun  size={17} className="cursor-pointer hover:text-[var(--text-primary)] transition-colors" onClick={toggle} />
         }
         {currentUser && (
           <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-orange-400 to-[#fe4e00] flex items-center justify-center text-[11px] font-bold text-white">
-              {initials}
-            </div>
-            <span className="text-[13px] font-medium text-white">{displayName}</span>
+            <button onClick={() => router.push("/settings")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+              {currentUser.avatar ? (
+                <img
+                  src={currentUser.avatar}
+                  alt={displayName}
+                  className="h-7 w-7 rounded-full object-cover ring-1 ring-white/10"
+                />
+              ) : (
+                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-orange-400 to-[#fe4e00] flex items-center justify-center text-[11px] font-bold text-white">
+                  {initials}
+                </div>
+              )}
+              <span className="hidden sm:inline text-[13px] font-medium text-[var(--text-primary)]">{displayName}</span>
+            </button>
             <button
               onClick={handleLogout}
               title="Wyloguj"
-              className="text-white/40 hover:text-white transition-colors"
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
               <LogOut size={15} />
             </button>

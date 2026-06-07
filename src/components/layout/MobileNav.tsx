@@ -13,10 +13,10 @@ import {
   Users,
   GitBranch,
   Settings,
-  RefreshCw,
   Wand2,
   Shirt,
   FilePlus,
+  FolderKanban,
 } from "lucide-react";
 
 const navItems = [
@@ -27,6 +27,7 @@ const navItems = [
   { href: "/orders",           label: "Zlecenia",          Icon: ClipboardList },
   { href: "/orders/new",       label: "Nowe zlecenie",     Icon: FilePlus },
   { href: "/clients",          label: "Klienci",           Icon: Users },
+  { href: "/projects",         label: "Projekty",          Icon: FolderKanban },
   { href: "/workflows",        label: "Workflow",          Icon: GitBranch },
   { href: "/settings",         label: "Ustawienia",        Icon: Settings },
 ];
@@ -70,8 +71,15 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
       >
         {/* Header */}
         <div className="flex h-14 items-center justify-between border-b border-white/[0.07] px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1a1a1a]">
-            <RefreshCw size={18} className="text-white" />
+          <div className="flex items-center gap-3">
+            <img
+              src="https://projektowanieprzemysl.pl/wp-content/uploads/2025/12/Projekt-bez-nazwy-3.png.webp"
+              alt="Projektowanie Przemyśl"
+              className="h-9 w-auto object-contain"
+            />
+            <span className="text-[13px] font-semibold text-white leading-tight">
+              Projektowanie<br />Przemyśl
+            </span>
           </div>
           <button
             onClick={onClose}

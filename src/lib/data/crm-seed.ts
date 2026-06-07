@@ -26,6 +26,7 @@ export const seedOrders: Order[] = [
     vatRate: 23,
     clientDeadline: "2026-04-15",
     plannedDeadline: "2026-04-14",
+    createdAt: "2026-05-03T09:00:00Z",
   },
   {
     id: "o-003",
@@ -80,6 +81,7 @@ export const seedOrders: Order[] = [
     netAmount: 750,
     vatRate: 23,
     clientDeadline: "2026-04-10",
+    createdAt: "2026-05-07T11:30:00Z",
   },
   {
     id: "o-008",
@@ -90,6 +92,7 @@ export const seedOrders: Order[] = [
     netAmount: 320,
     vatRate: 23,
     clientDeadline: "2026-04-08",
+    createdAt: "2026-05-09T14:00:00Z",
   },
   {
     id: "o-009",

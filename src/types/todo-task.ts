@@ -6,6 +6,13 @@ export type ChecklistItem = {
   done: boolean;
 };
 
+export type TodoCategory = {
+  id: string;
+  name: string;
+  color: string; // hex or tailwind-like token
+  icon: string;  // emoji
+};
+
 export type TodoTask = {
   id: string;
   title: string;
@@ -15,4 +22,5 @@ export type TodoTask = {
   doneAt?: string; // YYYY-MM-DD
   createdAt: string;
   checklist: ChecklistItem[];
+  categoryId?: string;
 };

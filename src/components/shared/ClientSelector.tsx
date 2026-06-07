@@ -12,9 +12,11 @@ type Props = {
   onChange?: (clientId: string | null) => void;
   /** Controlled value */
   value?: string | null;
+  /** Hides label and selected-client info block — for inline/header use */
+  compact?: boolean;
 };
 
-export function ClientSelector({ storeKey, label = "Przypisz do klienta", onChange, value }: Props) {
+export function ClientSelector({ storeKey, label = "Przypisz do klienta", onChange, value, compact = false }: Props) {
   const clients = useClientsStore((s) => s.clients);
 
   // Uncontrolled mode: persist to localStorage
@@ -35,6 +37,23 @@ export function ClientSelector({ storeKey, label = "Przypisz do klienta", onChan
       else localStorage.removeItem(storeKey);
     }
   };
+
+  if (compact) {
+    return (
+      <select
+        value={selectedId ?? ""}
+        onChange={(e) => handleChange(e.target.value || null)}
+        className="w-full rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] focus:ring-1 focus:ring-[var(--border-focus)] transition-colors"
+      >
+        <option value="">— Wybierz klienta —</option>
+        {clients.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}{c.type === "Firma" && c.contactPerson ? ` (${c.contactPerson})` : ""}
+          </option>
+        ))}
+      </select>
+    );
+  }
 
   return (
     <div className="space-y-1.5">

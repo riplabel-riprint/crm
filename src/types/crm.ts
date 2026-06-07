@@ -10,6 +10,7 @@ export type Client = {
   email?: string;
   phone?: string;
   address?: string;
+  nip?: string;
   notes?: string;
   status: ClientStatus;
   tags?: string[];
@@ -51,6 +52,7 @@ export type Order = {
   plannedDeadline?: string | null;
   netAmount: number;
   vatRate: number;
+  createdAt?: string;
 };
 
 export type DashboardStat = {

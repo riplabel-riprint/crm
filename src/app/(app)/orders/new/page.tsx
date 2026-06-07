@@ -1,28 +1,32 @@
 import Link from "next/link";
-import { mockServices } from "@/lib/mock-data";
 import { CreateOrderForm } from "@/components/orders/form/CreateOrderForm";
 
 export const metadata = { title: "Nowe zlecenie | Riprint" };
 
 export default function NewOrderPage() {
   return (
-    <div className="min-h-full bg-[#0d0d0d]">
-      <div className="border-b border-white/[0.06] bg-[#111] px-6 py-4">
-        <nav className="mb-1 flex items-center gap-1.5 text-xs text-white/30">
-          <Link href="/orders" className="hover:text-white/60 transition-colors">
+    <div className="min-h-full" style={{ backgroundColor: "#0f0f0f" }}>
+      <div className="px-6 pt-8 pb-6">
+        {/* Breadcrumb */}
+        <nav className="mb-6 flex items-center gap-1.5" style={{ fontSize: 12, letterSpacing: "0.5px", textTransform: "uppercase" }}>
+          <Link href="/orders" className="transition-colors hover:text-[#ff6b35]" style={{ color: "#666" }}>
             Zlecenia
           </Link>
-          <span>/</span>
-          <span className="text-white/60">Nowe zlecenie</span>
+          <span style={{ color: "#444" }}>/</span>
+          <span style={{ color: "#ff6b35", fontWeight: 500 }}>Nowe zlecenie</span>
         </nav>
-        <h1 className="text-xl font-semibold text-white">Nowe zlecenie</h1>
-        <p className="mt-0.5 text-sm text-white/40">
-          Uzupełnij formularz — zostanie utworzone zlecenie z wyceną v1 i workflow.
+
+        {/* Title */}
+        <h1 style={{ fontSize: 32, fontWeight: 600, color: "#ffffff", marginBottom: 8 }}>
+          Nowe zlecenie
+        </h1>
+        <p style={{ fontSize: 14, color: "#888888", lineHeight: 1.5, maxWidth: 600, marginBottom: 0 }}>
+          Utwórz nowe zlecenie. Wybierz klienta, produkty i wyznacz wycenę oraz termin realizacji.
         </p>
       </div>
 
-      <div className="px-6 py-6">
-        <CreateOrderForm services={mockServices} />
+      <div className="px-6 pb-12">
+        <CreateOrderForm />
       </div>
     </div>
   );
