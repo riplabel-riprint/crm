@@ -533,7 +533,7 @@ export function DashboardScreen({ recentOrders, clients, orders }: Props) {
   const loaded = useRef(false);
   const { width, containerRef } = useContainerWidth({ measureBeforeMount: false, initialWidth: 1280 });
 
-  function handleLayoutsChange(_: GridItem[], allLayouts: Layouts) {
+  function handleLayoutsChange(_: unknown, allLayouts: Layouts) {
     if (!loaded.current) {
       loaded.current = true;
       return;
