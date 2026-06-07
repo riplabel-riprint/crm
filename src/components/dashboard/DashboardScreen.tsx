@@ -636,6 +636,7 @@ export function DashboardScreen({ recentOrders, clients, orders }: Props) {
           {/* Responsive Grid */}
           <div ref={containerRef as React.RefObject<HTMLDivElement>} className={cn("w-full", resizing && "rgl-resizing-active")}>
             {width > 0 && (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               <ResponsiveGridLayout
                 width={width}
                 layouts={layouts}
